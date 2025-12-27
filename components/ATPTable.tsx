@@ -506,7 +506,7 @@ export default function ATPTable({ atps }: ATPTableProps) {
                   className="flex items-center gap-1 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
                 >
                   <Tooltip content="Allocation: Total tokens allocated. Claimed: Already claimed tokens. Claimable: Currently claimable tokens. Balance: Current contract balance">
-                    AMOUNTS
+                    AMOUNT
                   </Tooltip>
                   {sortColumn === "allocation" && (
                     <span className="text-gray-400 dark:text-gray-500">
