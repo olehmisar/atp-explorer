@@ -1,5 +1,5 @@
 import { discoverATPs, fetchATPData } from "@/lib/atp-detector";
-import { AZTEC_TOKEN_ADDRESS, MAX_ATP_CHECK } from "@/lib/constants";
+import { AZTEC_TOKEN_ADDRESS } from "@/lib/constants";
 import { getTokenHolders } from "@/lib/moralis";
 import { getCachedStats, setCachedStats } from "@/lib/redis";
 import { calculateUnlockSchedule } from "@/lib/unlock-calculator";
@@ -134,14 +134,12 @@ export async function GET() {
       holder.address?.toLowerCase().trim(),
     ) as Address[];
 
-    // Use the constant from constants.ts
-    const maxAddressesToCheck = MAX_ATP_CHECK;
-
     console.log(
-      `Checking up to ${maxAddressesToCheck} token holders for ATP contracts...`,
+      `Checking ${addresses.length} token holders for ATP contracts...`,
     );
 
-    const atpAddresses = await discoverATPs(addresses, maxAddressesToCheck);
+    // Pass 0 to check all addresses (unlimited)
+    const atpAddresses = await discoverATPs(addresses, 0);
     console.log(`Found ${atpAddresses.length} ATP contracts`);
 
     // Fetch data for each ATP

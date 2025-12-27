@@ -40,7 +40,6 @@ export interface ATPData {
 export interface TokenHolder {
   address: string;
   balance: string;
-  balanceFormatted: string;
   tokenAddress: string;
 }
 
