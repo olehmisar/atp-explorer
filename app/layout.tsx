@@ -1,20 +1,20 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
-import { QueryProvider } from '@/components/QueryProvider'
-import { Analytics } from '@vercel/analytics/react'
+import { QueryProvider } from "@/components/QueryProvider";
+import { Analytics } from "@vercel/analytics/react";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'ATP Dashboard - Aztec Token Position Stats',
-  description: 'Dashboard showing statistics for Aztec Token Positions (ATPs)',
-}
+  title: "ATP Dashboard - Aztec Token Position Stats",
+  description: "Dashboard showing statistics for Aztec Token Positions (ATPs)",
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
@@ -23,5 +23,5 @@ export default function RootLayout({
         <Analytics />
       </body>
     </html>
-  )
+  );
 }
