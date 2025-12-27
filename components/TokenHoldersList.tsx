@@ -49,7 +49,7 @@ export default function TokenHoldersList({ holders }: TokenHoldersListProps) {
         </p>
       ) : (
         <div className="space-y-2 max-h-96 overflow-y-auto">
-          {sortedHolders.slice(0, 20).map((holder, index) => (
+          {sortedHolders.slice(0, 100).map((holder, index) => (
             <div
               key={holder.address}
               className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded border border-gray-200 dark:border-gray-600"
