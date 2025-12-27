@@ -179,6 +179,7 @@ async function refreshATPs(holders: TokenHolder[]): Promise<ATPDashboardData> {
   );
   console.log("ATP data fetched");
 
+  console.log("Processing ATP data...");
   const atps: ATPData[] = [];
   atpDataResults.forEach((result, index) => {
     if (result.status === "fulfilled" && result.value) {
@@ -209,6 +210,8 @@ async function refreshATPs(holders: TokenHolder[]): Promise<ATPDashboardData> {
     }
   });
 
+  console.log("ATP data processed");
+
   // Mark holders as ATP if they are one
   const atpAddressSet = new Set(atpAddresses.map((addr) => addr.toLowerCase()));
   const holdersWithType: TokenHolder[] = holders.map((holder) => {
@@ -218,6 +221,8 @@ async function refreshATPs(holders: TokenHolder[]): Promise<ATPDashboardData> {
       type: isATP ? ("atp" as HolderType) : undefined, // We'll detect contract vs user later if needed
     };
   });
+
+  console.log("Holders with type processed");
 
   // Cache ATPs
   await setCachedATPs(atps);
@@ -230,7 +235,7 @@ async function refreshATPs(holders: TokenHolder[]): Promise<ATPDashboardData> {
     ...atpStats,
     tokenHolders: {
       total: holders.length,
-      holders: holdersWithType.slice(0, 100), // Limit to top 100 holders
+      holders: holdersWithType,
     },
   };
 
