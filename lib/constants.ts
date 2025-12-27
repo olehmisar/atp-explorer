@@ -3,18 +3,17 @@ export const AZTEC_TOKEN_ADDRESS =
   process.env.NEXT_PUBLIC_AZTEC_TOKEN_ADDRESS ||
   "0xa27ec0006e59f245217ff08cd52a7e8b169e62d2";
 
-// Ethereum mainnet chain ID
-export const ETHEREUM_MAINNET = "0x1";
-
-// Moralis chain - import EvmChain from @moralisweb3/common-evm-utils and use EvmChain.ETHEREUM
-// For string usage, we'll import it in the files that need it
-export const MORALIS_CHAIN = "0x1"; // This is kept for backward compatibility, but use EvmChain.ETHEREUM in code
-
-// Update this with actual ATP contract addresses if known
-export const ATP_CONTRACTS = {
-  LATP: process.env.NEXT_PUBLIC_LATP_ADDRESS || "",
-  MATP: process.env.NEXT_PUBLIC_MATP_ADDRESS || "",
-  NCATP: process.env.NEXT_PUBLIC_NCATP_ADDRESS || "",
+// Known address names for display in UI
+// All addresses are normalized to lowercase for matching
+export const ADDRESS_NAMES: Record<string, string> = {
+  "0x603bb2c05d474794ea97805e8de69bccfb3bca12": "Aztec Rollup",
+  "0x1102471eb3378fee427121c9efcea452e4b6b75e": "Aztec Governance",
+  "0x662de311f94bdbb571d95b5909e9cc6a25a6802a": "Aztec Treasury",
+  "0x13620833364653fa125ccdd7cf54b9e4a22ab6d9": "Aztec Foundation",
+  "0x92ba0fd39658105fac4df2b9bade998b5816b350": "Aztec Labs",
+  "0x3d6a1b00c830c5f278fc5dfb3f6ff0b74db6dfe0": "Aztec Rewards Distributor",
+  "0x4b00c30ceba3f188407c6e6741cc5b43561f1f6e": "Aztec Token Sale",
+  "0x000000000004444c5dc75cb358380d2e3de08a90": "Uniswap V4",
 };
 
 // Default number of addresses to check for ATP contracts

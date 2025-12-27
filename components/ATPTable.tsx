@@ -1,4 +1,4 @@
-import { formatTokenAmount, truncateAddress } from "@/lib/utils";
+import { formatAddress, formatTokenAmount } from "@/lib/utils";
 import { ATPData, ATPType } from "@/types/atp";
 import { format } from "date-fns";
 
@@ -90,9 +90,9 @@ export default function ATPTable({ atps }: ATPTableProps) {
                     href={`https://etherscan.io/address/${atp.address}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
                   >
-                    {truncateAddress(atp.address)}
+                    {formatAddress(atp.address)}
                   </a>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -109,9 +109,9 @@ export default function ATPTable({ atps }: ATPTableProps) {
                     href={`https://etherscan.io/address/${atp.beneficiary}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
                   >
-                    {truncateAddress(atp.beneficiary)}
+                    {formatAddress(atp.beneficiary)}
                   </a>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">

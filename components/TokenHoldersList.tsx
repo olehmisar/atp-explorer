@@ -1,5 +1,5 @@
+import { formatAddress, formatTokenAmount } from "@/lib/utils";
 import { HolderType, TokenHolder } from "@/types/atp";
-import { formatTokenAmount, truncateAddress } from "@/lib/utils";
 
 interface TokenHoldersListProps {
   holders: TokenHolder[];
@@ -63,9 +63,9 @@ export default function TokenHoldersList({ holders }: TokenHoldersListProps) {
                     href={`https://etherscan.io/address/${holder.address}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
                   >
-                    {truncateAddress(holder.address)}
+                    {formatAddress(holder.address)}
                   </a>
                   {getHolderTypeBadge(holder.type)}
                 </div>
