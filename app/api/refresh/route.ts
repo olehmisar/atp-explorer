@@ -184,10 +184,23 @@ async function refreshATPs(holders: TokenHolder[]): Promise<ATPDashboardData> {
       }
       atps.push(atp);
     } else {
-      console.error(
-        `Failed to fetch data for ATP ${atpAddresses[index]}:`,
-        result.status === "rejected" ? result.reason : "Unknown error",
-      );
+      const address = atpAddresses[index];
+      if (result.status === "rejected") {
+        const error = result.reason;
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        const errorStack = error instanceof Error ? error.stack : undefined;
+        console.error(
+          `Failed to fetch data for ATP ${address}: ${errorMessage}`,
+        );
+        if (errorStack) {
+          console.error(`Error stack for ${address}:`, errorStack);
+        }
+      } else {
+        console.error(
+          `Failed to fetch data for ATP ${address}: Unknown error (result was not fulfilled but not rejected)`,
+        );
+      }
     }
   });
 

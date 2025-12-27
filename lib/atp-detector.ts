@@ -122,7 +122,6 @@ export async function isATPContract(address: Address): Promise<boolean> {
         functionName: "getBeneficiary",
       }),
     ]);
-    console.log("atp contract", type, beneficiary);
 
     // If both calls succeed and return valid data, it's an ATP
     return (
@@ -221,27 +220,95 @@ export async function fetchATPData(
       ]);
 
       // Extract required fields (must succeed)
-      if (
-        type.status !== "fulfilled" ||
-        beneficiary.status !== "fulfilled" ||
-        allocation.status !== "fulfilled" ||
-        claimed.status !== "fulfilled" ||
-        claimable.status !== "fulfilled" ||
-        isRevokable.status !== "fulfilled" ||
-        globalLock.status !== "fulfilled" ||
-        balance.status !== "fulfilled"
-      ) {
-        throw new Error("Failed to fetch required ATP data");
+      const failedFields: string[] = [];
+      if (type.status !== "fulfilled") {
+        failedFields.push("getType");
+        console.error(
+          `Failed to fetch getType for ${atpAddress}:`,
+          type.status === "rejected" ? type.reason : "unknown error",
+        );
+      }
+      if (beneficiary.status !== "fulfilled") {
+        failedFields.push("getBeneficiary");
+        console.error(
+          `Failed to fetch getBeneficiary for ${atpAddress}:`,
+          beneficiary.status === "rejected"
+            ? beneficiary.reason
+            : "unknown error",
+        );
+      }
+      if (allocation.status !== "fulfilled") {
+        failedFields.push("getAllocation");
+        console.error(
+          `Failed to fetch getAllocation for ${atpAddress}:`,
+          allocation.status === "rejected"
+            ? allocation.reason
+            : "unknown error",
+        );
+      }
+      if (claimed.status !== "fulfilled") {
+        failedFields.push("getClaimed");
+        console.error(
+          `Failed to fetch getClaimed for ${atpAddress}:`,
+          claimed.status === "rejected" ? claimed.reason : "unknown error",
+        );
+      }
+      if (claimable.status !== "fulfilled") {
+        failedFields.push("getClaimable");
+        console.error(
+          `Failed to fetch getClaimable for ${atpAddress}:`,
+          claimable.status === "rejected" ? claimable.reason : "unknown error",
+        );
+      }
+      if (isRevokable.status !== "fulfilled") {
+        failedFields.push("getIsRevokable");
+        console.error(
+          `Failed to fetch getIsRevokable for ${atpAddress}:`,
+          isRevokable.status === "rejected"
+            ? isRevokable.reason
+            : "unknown error",
+        );
+      }
+      if (globalLock.status !== "fulfilled") {
+        failedFields.push("getGlobalLock");
+        console.error(
+          `Failed to fetch getGlobalLock for ${atpAddress}:`,
+          globalLock.status === "rejected"
+            ? globalLock.reason
+            : "unknown error",
+        );
+      }
+      if (balance.status !== "fulfilled") {
+        failedFields.push("balanceOf");
+        console.error(
+          `Failed to fetch balanceOf for ${atpAddress}:`,
+          balance.status === "rejected" ? balance.reason : "unknown error",
+        );
       }
 
-      const typeValue = type.value;
-      const beneficiaryValue = beneficiary.value;
-      const allocationValue = allocation.value;
-      const claimedValue = claimed.value;
-      const claimableValue = claimable.value;
-      const isRevokableValue = isRevokable.value;
-      const globalLockValue = globalLock.value;
-      const balanceValue = balance.value;
+      if (failedFields.length > 0) {
+        const errorMessage = `Failed to fetch required ATP data for ${atpAddress}. Failed fields: ${failedFields.join(
+          ", ",
+        )}`;
+        console.error(errorMessage);
+        throw new Error(errorMessage);
+      }
+
+      // At this point, all required fields are fulfilled, so we can safely access .value
+      const typeValue = (type as PromiseFulfilledResult<number>).value;
+      const beneficiaryValue = (beneficiary as PromiseFulfilledResult<Address>)
+        .value;
+      const allocationValue = (allocation as PromiseFulfilledResult<bigint>)
+        .value;
+      const claimedValue = (claimed as PromiseFulfilledResult<bigint>).value;
+      const claimableValue = (claimable as PromiseFulfilledResult<bigint>)
+        .value;
+      const isRevokableValue = (isRevokable as PromiseFulfilledResult<boolean>)
+        .value;
+      const globalLockValue = globalLock as PromiseFulfilledResult<
+        readonly [bigint, bigint, bigint, bigint]
+      >;
+      const balanceValue = (balance as PromiseFulfilledResult<bigint>).value;
 
       // Extract optional fields (may fail)
       const isRevoked =
@@ -269,12 +336,7 @@ export async function fetchATPData(
       // Convert all BigInt values to strings for JSON serialization
       // globalLock returns Lock struct: [startTime, cliff, endTime, allocation]
       // All values are in SECONDS (Unix timestamps for startTime/cliff/endTime)
-      const globalLockTuple = globalLockValue as readonly [
-        bigint,
-        bigint,
-        bigint,
-        bigint,
-      ];
+      const globalLockTuple = globalLockValue.value;
 
       // Contract returns Lock struct: {startTime, cliff, endTime, allocation}
       const startTimeSeconds = Number(globalLockTuple[0]);
@@ -324,11 +386,18 @@ export async function fetchATPData(
       };
     }, 3); // 3 retries for ATP data fetching
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     console.error(
       `Error fetching ATP data for ${atpAddress} after retries:`,
-      error,
+      errorMessage,
     );
-    return null;
+    if (error instanceof Error) {
+      console.error("Error stack:", error.stack);
+    }
+    // Re-throw the error instead of silently returning null
+    throw new Error(
+      `Failed to fetch ATP data for ${atpAddress}: ${errorMessage}`,
+    );
   }
 }
 
@@ -340,7 +409,7 @@ export async function fetchATPData(
  */
 export async function discoverATPs(
   addresses: Address[],
-  maxAddresses: number = 1000,
+  maxAddresses: number,
 ): Promise<Address[]> {
   const atpAddresses: Address[] = [];
   console.log("addresses", addresses);
@@ -379,7 +448,6 @@ export async function discoverATPs(
       const address = batch[index];
       if (result.status === "fulfilled" && result.value) {
         atpAddresses.push(address);
-        console.log(`✓ Found ATP contract: ${address}`);
       }
       // Don't log errors - invalid addresses are expected and handled silently
     });
