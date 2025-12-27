@@ -147,7 +147,9 @@ async function refreshHolders(): Promise<TokenHolder[]> {
   // Cache holders and update holders last refresh timestamp
   await setCachedHolders(holders);
   await setHoldersLastRefresh(Math.floor(Date.now() / 1000));
-  console.log("Step 1 complete: Holders cached with separate last refresh timestamp");
+  console.log(
+    "Step 1 complete: Holders cached with separate last refresh timestamp",
+  );
 
   return holders;
 }
@@ -171,8 +173,11 @@ async function refreshATPs(holders: TokenHolder[]): Promise<ATPDashboardData> {
   console.log(`Found ${atpAddresses.length} ATP contracts`);
 
   // Fetch ATP data
-  const atpDataPromises = atpAddresses.map((address) => fetchATPData(address));
-  const atpDataResults = await Promise.allSettled(atpDataPromises);
+  console.log("Fetching ATP data...");
+  const atpDataResults = await Promise.allSettled(
+    atpAddresses.map((address) => fetchATPData(address)),
+  );
+  console.log("ATP data fetched");
 
   const atps: ATPData[] = [];
   atpDataResults.forEach((result, index) => {
