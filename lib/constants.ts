@@ -10,7 +10,7 @@ export const ADDRESS_NAMES: Record<string, string> = {
   "0x1102471eb3378fee427121c9efcea452e4b6b75e": "Aztec Governance",
   "0x662de311f94bdbb571d95b5909e9cc6a25a6802a": "Aztec Treasury",
   "0x13620833364653fa125ccdd7cf54b9e4a22ab6d9": "Aztec Foundation",
-  "0x92ba0fd39658105fac4df2b9bade998b5816b350": "Aztec Labs",
+  "0x92ba0fd39658105fac4df2b9bade998b5816b350": "Aztec Labs?",
   "0x3d6a1b00c830c5f278fc5dfb3f6ff0b74db6dfe0": "Aztec Rewards Distributor",
   "0x4b00c30ceba3f188407c6e6741cc5b43561f1f6e": "Aztec Token Sale",
   "0x000000000004444c5dc75cb358380d2e3de08a90": "Uniswap V4",
