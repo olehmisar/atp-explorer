@@ -253,8 +253,8 @@ export default function ATPTable({ atps }: ATPTableProps) {
               compact ? "text-xs" : "text-sm"
             } text-gray-700 dark:text-gray-300`}
           >
-            Showing {startIndex + 1} to {Math.min(endIndex, sortedATPs.length)}{" "}
-            of {sortedATPs.length} positions
+            {startIndex + 1} to {Math.min(endIndex, sortedATPs.length)} of{" "}
+            {sortedATPs.length}
           </div>
         )}
         <div className="flex items-center gap-4">

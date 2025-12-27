@@ -88,7 +88,7 @@ function ATPUnlockChart({ atp }: ATPUnlockChartProps) {
       <ResponsiveContainer width="100%" height={120}>
         <LineChart
           data={chartData}
-          margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
+          margin={{ top: 5, right: 5, bottom: 5, left: 50 }}
         >
           <CartesianGrid
             strokeDasharray="3 3"
@@ -114,7 +114,7 @@ function ATPUnlockChart({ atp }: ATPUnlockChartProps) {
               return num.toFixed(0);
             }}
             className="text-xs"
-            width={40}
+            width={60}
             tickCount={4}
           />
           <Tooltip content={<CustomTooltip />} />
