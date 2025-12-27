@@ -16,3 +16,12 @@ export const ATP_CONTRACTS = {
   MATP: process.env.NEXT_PUBLIC_MATP_ADDRESS || "",
   NCATP: process.env.NEXT_PUBLIC_NCATP_ADDRESS || "",
 };
+
+// Default number of addresses to check for ATP contracts
+export const DEFAULT_MAX_ATP_CHECK = 50;
+
+// Maximum number of addresses to check for ATP contracts (from env or default)
+export const MAX_ATP_CHECK = parseInt(
+  process.env.MAX_ATP_CHECK || String(DEFAULT_MAX_ATP_CHECK),
+  10,
+);

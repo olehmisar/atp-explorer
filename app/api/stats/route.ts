@@ -1,5 +1,5 @@
 import { discoverATPs, fetchATPData } from "@/lib/atp-detector";
-import { AZTEC_TOKEN_ADDRESS } from "@/lib/constants";
+import { AZTEC_TOKEN_ADDRESS, MAX_ATP_CHECK } from "@/lib/constants";
 import { getTokenHolders } from "@/lib/moralis";
 import { ATPData, ATPStats, ATPType, TokenHolder } from "@/types/atp";
 import { NextResponse } from "next/server";
@@ -112,8 +112,8 @@ export async function GET() {
       holder.address?.toLowerCase().trim(),
     ) as Address[];
 
-    // Limit to first 15 addresses for debugging (adjust as needed)
-    const maxAddressesToCheck = parseInt(process.env.MAX_ATP_CHECK || "15", 10);
+    // Use the constant from constants.ts
+    const maxAddressesToCheck = MAX_ATP_CHECK;
 
     console.log(
       `Checking up to ${maxAddressesToCheck} token holders for ATP contracts...`,
