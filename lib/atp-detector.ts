@@ -102,42 +102,6 @@ function createClient() {
 }
 
 /**
- * Check if an address is an ATP contract by trying to call getType() and getBeneficiary()
- * Batch multicall is enabled in the client, so these calls will be automatically batched
- */
-export async function isATPContract(address: Address): Promise<boolean> {
-  const client = createClient();
-
-  try {
-    // These calls will be automatically batched by viem's multicall
-    const [type, beneficiary] = await Promise.all([
-      client.readContract({
-        address,
-        abi: ATP_ABI,
-        functionName: "getType",
-      }),
-      client.readContract({
-        address,
-        abi: ATP_ABI,
-        functionName: "getBeneficiary",
-      }),
-    ]);
-
-    // If both calls succeed and return valid data, it's an ATP
-    return (
-      typeof type === "number" &&
-      type >= 0 &&
-      type <= 2 &&
-      typeof beneficiary === "string"
-    );
-  } catch (error) {
-    // If either call fails, it's not an ATP contract
-    // Don't log errors for invalid addresses - this is expected
-    return false;
-  }
-}
-
-/**
  * Fetch ATP data from a contract address
  */
 export async function fetchATPData(
@@ -222,11 +186,7 @@ export async function fetchATPData(
       // Extract required fields (must succeed)
       const failedFields: string[] = [];
       if (type.status !== "fulfilled") {
-        failedFields.push("getType");
-        console.error(
-          `Failed to fetch getType for ${atpAddress}:`,
-          type.status === "rejected" ? type.reason : "unknown error",
-        );
+        return null; // not an ATP contract
       }
       if (beneficiary.status !== "fulfilled") {
         failedFields.push("getBeneficiary");
@@ -402,61 +362,72 @@ export async function fetchATPData(
 }
 
 /**
- * Discover ATP contracts from a list of addresses
- * Batch multicall is enabled in the client, so all calls will be automatically batched
- * @param addresses - List of addresses to check
- * @param maxAddresses - Maximum number of addresses to check (default: 1000, set to 0 for unlimited)
+ * Discover ATPs and fetch their data in batches
+ * This combines discovery and data fetching to process in batches and avoid memory issues
  */
-export async function discoverATPs(
+export async function discoverAndFetchATPs(
   addresses: Address[],
-  maxAddresses: number,
-): Promise<Address[]> {
-  const atpAddresses: Address[] = [];
-  console.log("addresses", addresses);
-
-  // Limit the number of addresses to check if specified
-  const addressesToCheck =
-    maxAddresses > 0 ? addresses.slice(0, maxAddresses) : addresses;
-
-  const invalidCount = addresses.length - addresses.length;
-  if (invalidCount > 0) {
-    console.log(
-      `Filtered out ${invalidCount} invalid addresses (empty or invalid format)`,
-    );
-  }
+): Promise<ATPData[]> {
+  const atps: ATPData[] = [];
+  console.log("Starting ATP discovery and data fetching...");
 
   console.log(
-    `Checking ${addressesToCheck.length} valid addresses for ATP contracts...`,
+    `Checking ${addresses.length} valid addresses for ATP contracts...`,
   );
 
-  // Process all addresses - viem will automatically batch the readContract calls
-  // Process in smaller batches to avoid overwhelming the RPC with too many calls at once
-  const batchSize = 50; // Process 50 addresses at a time
-  for (let i = 0; i < addressesToCheck.length; i += batchSize) {
-    const batch = addressesToCheck.slice(i, i + batchSize);
+  // Process all addresses in batches - discover and fetch data together
+  const batchSize = 1000;
+  for (let i = 0; i < addresses.length; i += batchSize) {
+    const batch = addresses.slice(i, i + batchSize);
+    const batchNumber = Math.floor(i / batchSize) + 1;
+    const totalBatches = Math.ceil(addresses.length / batchSize);
+
     console.log(
-      `Processing batch ${Math.floor(i / batchSize) + 1}: addresses ${
+      `Processing batch ${batchNumber}/${totalBatches}: addresses ${
         i + 1
-      }-${Math.min(i + batchSize, addressesToCheck.length)}`,
+      }-${Math.min(i + batchSize, addresses.length)}`,
     );
 
-    const results = await Promise.allSettled(
-      batch.map((address) => isATPContract(address)),
+    // Step 1: Discover ATPs in this batch
+
+    const batchAtpAddresses: Address[] = batch;
+
+    // Step 2: Fetch data for discovered ATPs in this batch
+    if (batchAtpAddresses.length > 0) {
+      console.log(
+        `Found ${batchAtpAddresses.length} ATPs in batch ${batchNumber}, fetching data...`,
+      );
+
+      const dataResults = await Promise.allSettled(
+        batchAtpAddresses.map((address) => fetchATPData(address)),
+      );
+
+      const batchData: ATPData[] = [];
+      dataResults.forEach((result, index) => {
+        const address = batchAtpAddresses[index];
+        if (result.status === "fulfilled" && result.value) {
+          batchData.push(result.value);
+          atps.push(result.value);
+        } else {
+          if (result.status === "rejected") {
+            const error = result.reason;
+            const errorMessage =
+              error instanceof Error ? error.message : String(error);
+            console.error(
+              `Failed to fetch data for ATP ${address}: ${errorMessage}`,
+            );
+          }
+        }
+      });
+    }
+
+    console.log(
+      `Batch ${batchNumber} complete: ${atps.length} ATPs found and fetched so far`,
     );
-
-    results.forEach((result, index) => {
-      const address = batch[index];
-      if (result.status === "fulfilled" && result.value) {
-        atpAddresses.push(address);
-      }
-      // Don't log errors - invalid addresses are expected and handled silently
-    });
-
-    console.log(`Batch complete: ${atpAddresses.length} ATPs found so far`);
   }
 
   console.log(
-    `Discovery complete: ${atpAddresses.length} ATP contracts found out of ${addressesToCheck.length} addresses checked`,
+    `Discovery and fetch complete: ${atps.length} ATP contracts found and fetched out of ${addresses.length} addresses checked`,
   );
-  return atpAddresses;
+  return atps;
 }

@@ -1,4 +1,4 @@
-import { discoverATPs, fetchATPData } from "@/lib/atp-detector";
+import { discoverAndFetchATPs } from "@/lib/atp-detector";
 import { AZTEC_TOKEN_ADDRESS } from "@/lib/constants";
 import { getTokenHolders } from "@/lib/moralis";
 import {
@@ -156,11 +156,12 @@ async function refreshHolders(): Promise<TokenHolder[]> {
 
 /**
  * Refresh cache - Step 2: Discover and fetch ATPs, then cache everything
+ * Uses batched discovery and fetching to avoid memory issues
  */
 async function refreshATPs(holders: TokenHolder[]): Promise<ATPDashboardData> {
   console.log("Step 2: Discovering and fetching ATPs...");
 
-  // Discover ATPs
+  // Prepare addresses
   const addresses = holders.map((holder) =>
     holder.address?.toLowerCase().trim(),
   ) as Address[];
@@ -169,51 +170,24 @@ async function refreshATPs(holders: TokenHolder[]): Promise<ATPDashboardData> {
     `Checking ${addresses.length} token holders for ATP contracts...`,
   );
 
-  const atpAddresses = await discoverATPs(addresses, 0); // Check all addresses
-  console.log(`Found ${atpAddresses.length} ATP contracts`);
+  // Discover and fetch ATPs in batches
+  const atps = await discoverAndFetchATPs(addresses);
 
-  // Fetch ATP data
-  console.log("Fetching ATP data...");
-  const atpDataResults = await Promise.allSettled(
-    atpAddresses.map((address) => fetchATPData(address)),
-  );
-  console.log("ATP data fetched");
-
-  console.log("Processing ATP data...");
-  const atps: ATPData[] = [];
-  atpDataResults.forEach((result, index) => {
-    if (result.status === "fulfilled" && result.value) {
-      const atp = result.value;
-      // Calculate unlock schedule if globalLock exists
-      if (atp.globalLock) {
-        atp.unlockSchedule = calculateUnlockSchedule(atp.globalLock);
-      }
-      atps.push(atp);
-    } else {
-      const address = atpAddresses[index];
-      if (result.status === "rejected") {
-        const error = result.reason;
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        const errorStack = error instanceof Error ? error.stack : undefined;
-        console.error(
-          `Failed to fetch data for ATP ${address}: ${errorMessage}`,
-        );
-        if (errorStack) {
-          console.error(`Error stack for ${address}:`, errorStack);
-        }
-      } else {
-        console.error(
-          `Failed to fetch data for ATP ${address}: Unknown error (result was not fulfilled but not rejected)`,
-        );
-      }
+  // Calculate unlock schedules for all ATPs
+  console.log("Calculating unlock schedules...");
+  atps.forEach((atp) => {
+    // Calculate unlock schedule if globalLock exists
+    if (atp.globalLock) {
+      atp.unlockSchedule = calculateUnlockSchedule(atp.globalLock);
     }
   });
 
-  console.log("ATP data processed");
+  console.log(`ATP data processed: ${atps.length} ATPs`);
 
   // Mark holders as ATP if they are one
-  const atpAddressSet = new Set(atpAddresses.map((addr) => addr.toLowerCase()));
+  const atpAddressSet = new Set<string>(
+    atps.map((atp) => atp.address.toLowerCase()),
+  );
   const holdersWithType: TokenHolder[] = holders.map((holder) => {
     const isATP = atpAddressSet.has(holder.address.toLowerCase());
     return {
