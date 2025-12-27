@@ -1,8 +1,15 @@
 import { discoverATPs, fetchATPData } from "@/lib/atp-detector";
 import { AZTEC_TOKEN_ADDRESS, MAX_ATP_CHECK } from "@/lib/constants";
 import { getTokenHolders } from "@/lib/moralis";
+import { getCachedStats, setCachedStats } from "@/lib/redis";
 import { calculateUnlockSchedule } from "@/lib/unlock-calculator";
-import { ATPData, ATPStats, ATPType, TokenHolder } from "@/types/atp";
+import {
+  ATPDashboardData,
+  ATPData,
+  ATPStats,
+  ATPType,
+  TokenHolder,
+} from "@/types/atp";
 import { NextResponse } from "next/server";
 import { Address } from "viem";
 
@@ -92,6 +99,20 @@ function calculateATPStats(atps: ATPData[]): Omit<ATPStats, "tokenHolders"> {
 
 export async function GET() {
   try {
+    // Check cache FIRST - before any external calls (RPC, Moralis, etc.)
+    const cached = await getCachedStats();
+    if (cached) {
+      console.log(
+        "Cache hit - returning cached ATP stats (skipping all RPC/Moralis calls)",
+      );
+      return NextResponse.json(cached as ATPDashboardData);
+    }
+
+    console.log(
+      "Cache miss - fetching fresh data (will make RPC and Moralis calls)",
+    );
+
+    // Only execute expensive operations if cache miss
     // Fetch token holders from Moralis
     let holders: TokenHolder[] = [];
 
@@ -157,11 +178,19 @@ export async function GET() {
       },
     };
 
-    // Return both stats and ATPs in a single response
-    return NextResponse.json({
+    // Prepare response data
+    const responseData: ATPDashboardData = {
       stats,
       atps,
+    };
+
+    // Cache the response (non-blocking)
+    setCachedStats(responseData).catch((err) => {
+      console.error("Failed to cache response:", err);
     });
+
+    // Return both stats and ATPs in a single response
+    return NextResponse.json(responseData);
   } catch (error) {
     console.error("Error in stats API:", error);
     return NextResponse.json(

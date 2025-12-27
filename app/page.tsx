@@ -7,41 +7,32 @@ import TypeDistribution from "@/components/TypeDistribution";
 import UnlockChart from "@/components/UnlockChart";
 import UnlockStats from "@/components/UnlockStats";
 import { AZTEC_TOKEN_ADDRESS } from "@/lib/constants";
-import { ATPDashboardData, ATPData, ATPStats } from "@/types/atp";
-import { useEffect, useState } from "react";
+import { ATPDashboardData } from "@/types/atp";
+import { useQuery } from "@tanstack/react-query";
+
+async function fetchATPStats(): Promise<ATPDashboardData> {
+  const response = await fetch("/api/stats");
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch data");
+  }
+
+  return response.json();
+}
 
 export default function Home() {
-  const [stats, setStats] = useState<ATPStats | null>(null);
-  const [atps, setAtps] = useState<ATPData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data,
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["atp-stats"],
+    queryFn: fetchATPStats,
+  });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await fetch("/api/stats");
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch data");
-      }
-
-      const data: ATPDashboardData = await response.json();
-
-      setStats(data.stats);
-      setAtps(data.atps);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-      console.error("Error fetching data:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const stats = data?.stats ?? null;
+  const atps = data?.atps ?? [];
 
   if (loading) {
     return (
@@ -68,9 +59,11 @@ export default function Home() {
             <h2 className="text-red-800 dark:text-red-200 font-semibold mb-2">
               Error
             </h2>
-            <p className="text-red-600 dark:text-red-300">{error}</p>
+            <p className="text-red-600 dark:text-red-300">
+              {error instanceof Error ? error.message : "An error occurred"}
+            </p>
             <button
-              onClick={fetchData}
+              onClick={() => refetch()}
               className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
             >
               Retry
