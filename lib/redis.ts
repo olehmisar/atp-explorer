@@ -2,7 +2,7 @@ import { Redis } from "@upstash/redis";
 
 // Initialize Redis client only if credentials are available
 // Falls back to no caching if Redis is unavailable
-let redis: Redis | null = null;
+export let redis: Redis | null = null;
 
 try {
   const redisUrl = process.env.UPSTASH_REDIS_URL;
@@ -22,76 +22,152 @@ try {
   redis = null;
 }
 
-// Cache key for ATP stats
-const CACHE_KEY = "atp:stats";
+// Cache keys
+const CACHE_KEY_HOLDERS = "atp:holders";
+const CACHE_KEY_ATPS = "atp:atps";
+const CACHE_KEY_STATS = "atp:stats";
+const CACHE_KEY_LAST_REFRESH = "atp:last_refresh";
 
-// Cache TTL: 15 minutes (900 seconds)
-const CACHE_TTL = 900;
+// Refresh interval: 1 day (86400 seconds)
+const REFRESH_INTERVAL = 86400;
 
 /**
- * Get cached ATP stats data
- * Returns null if cache is unavailable or on any error
+ * Get cached holders data
+ */
+export async function getCachedHolders() {
+  if (!redis) return null;
+  try {
+    const cached = await redis.get(CACHE_KEY_HOLDERS);
+    if (!cached) return null;
+    return typeof cached === "string" ? JSON.parse(cached) : cached;
+  } catch (error) {
+    console.warn("Error reading holders cache:", error);
+    return null;
+  }
+}
+
+/**
+ * Set cached holders data (persists forever, no TTL)
+ */
+export async function setCachedHolders(data: unknown) {
+  if (!redis) return;
+  try {
+    await redis.set(CACHE_KEY_HOLDERS, JSON.stringify(data));
+  } catch (error) {
+    console.warn("Error writing holders cache:", error);
+  }
+}
+
+/**
+ * Get cached ATPs data
+ */
+export async function getCachedATPs() {
+  if (!redis) return null;
+  try {
+    const cached = await redis.get(CACHE_KEY_ATPS);
+    if (!cached) return null;
+    return typeof cached === "string" ? JSON.parse(cached) : cached;
+  } catch (error) {
+    console.warn("Error reading ATPs cache:", error);
+    return null;
+  }
+}
+
+/**
+ * Set cached ATPs data (persists forever, no TTL)
+ */
+export async function setCachedATPs(data: unknown) {
+  if (!redis) return;
+  try {
+    await redis.set(CACHE_KEY_ATPS, JSON.stringify(data));
+  } catch (error) {
+    console.warn("Error writing ATPs cache:", error);
+  }
+}
+
+/**
+ * Get cached complete stats data (includes lastUpdated timestamp)
  */
 export async function getCachedStats() {
-  if (!redis) {
-    return null;
-  }
-
+  if (!redis) return null;
   try {
-    const cached = await redis.get(CACHE_KEY);
-    if (!cached) {
-      return null;
-    }
-
-    // Upstash Redis may return the data already parsed or as a string
-    // Handle both cases
-    if (typeof cached === "string") {
-      return JSON.parse(cached);
-    } else if (typeof cached === "object") {
-      // Already parsed, return as-is
-      return cached;
-    }
-
-    return null;
+    const cached = await redis.get(CACHE_KEY_STATS);
+    if (!cached) return null;
+    return typeof cached === "string" ? JSON.parse(cached) : cached;
   } catch (error) {
-    // Log error but don't throw - gracefully degrade to no caching
-    console.warn("Error reading from cache (falling back to no cache):", error);
+    console.warn("Error reading stats cache:", error);
     return null;
   }
 }
 
 /**
- * Set cached ATP stats data
- * Optimized for free plan: uses minimal storage
- * Silently fails if Redis is unavailable or on any error
+ * Set cached complete stats data (includes lastUpdated timestamp)
+ * Persists forever, no TTL
  */
 export async function setCachedStats(data: unknown) {
-  if (!redis) {
-    return; // No-op if Redis is not available
-  }
-
+  if (!redis) return;
   try {
-    // Use JSON.stringify with minimal whitespace to save space
-    const serialized = JSON.stringify(data);
-    await redis.setex(CACHE_KEY, CACHE_TTL, serialized);
+    await redis.set(CACHE_KEY_STATS, JSON.stringify(data));
   } catch (error) {
-    // Log warning but don't throw - gracefully degrade to no caching
-    // This handles cases like rate limits, connection errors, etc.
-    console.warn("Error writing to cache (continuing without cache):", error);
+    console.warn("Error writing stats cache:", error);
   }
 }
 
 /**
- * Clear the cache (useful for testing or manual invalidation)
- * Silently fails if Redis is unavailable
+ * Get last refresh timestamp
+ */
+export async function getLastRefresh(): Promise<number | null> {
+  if (!redis) return null;
+  try {
+    const cached = await redis.get(CACHE_KEY_LAST_REFRESH);
+    if (!cached) return null;
+    return typeof cached === "string" ? parseInt(cached, 10) : Number(cached);
+  } catch (error) {
+    console.warn("Error reading last refresh:", error);
+    return null;
+  }
+}
+
+/**
+ * Set last refresh timestamp
+ */
+export async function setLastRefresh(timestamp: number) {
+  if (!redis) return;
+  try {
+    await redis.set(CACHE_KEY_LAST_REFRESH, timestamp.toString());
+  } catch (error) {
+    console.warn("Error writing last refresh:", error);
+  }
+}
+
+/**
+ * Check if refresh should be skipped (within 90% of refresh interval)
+ */
+export async function shouldSkipRefresh(): Promise<boolean> {
+  if (!redis) return false;
+
+  const lastRefresh = await getLastRefresh();
+  if (!lastRefresh) return false;
+
+  const now = Math.floor(Date.now() / 1000); // Current time in seconds
+  const timeSinceRefresh = now - lastRefresh;
+  const skipThreshold = REFRESH_INTERVAL * 0.9; // 90% of refresh interval
+
+  return timeSinceRefresh < skipThreshold;
+}
+
+/**
+ * Clear all cache
  */
 export async function clearCache() {
-  if (!redis) {
-    return; // No-op if Redis is not available
-  }
-
+  if (!redis) return;
   try {
-    await redis.del(CACHE_KEY);
+    await redis.del(
+      CACHE_KEY_HOLDERS,
+      CACHE_KEY_ATPS,
+      CACHE_KEY_STATS,
+      CACHE_KEY_LAST_REFRESH,
+    );
   } catch (error) {
     console.warn("Error clearing cache:", error);
   }

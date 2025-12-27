@@ -37,10 +37,13 @@ export interface ATPData {
   staker?: string;
 }
 
+export type HolderType = "user" | "contract" | "atp";
+
 export interface TokenHolder {
   address: string;
   balance: string;
   tokenAddress: string;
+  type?: HolderType; // Type of holder: user, contract, or ATP
 }
 
 export interface ATPStats {
@@ -66,4 +69,5 @@ export interface ATPStats {
 export interface ATPDashboardData {
   stats: ATPStats;
   atps: ATPData[];
+  lastUpdated: number; // Unix timestamp in milliseconds
 }

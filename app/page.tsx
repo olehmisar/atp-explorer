@@ -9,6 +9,7 @@ import UnlockStats from "@/components/UnlockStats";
 import { AZTEC_TOKEN_ADDRESS } from "@/lib/constants";
 import { ATPDashboardData } from "@/types/atp";
 import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 
 async function fetchATPStats(): Promise<ATPDashboardData> {
   const response = await fetch("/api/stats");
@@ -88,6 +89,12 @@ export default function Home() {
             Token Address:{" "}
             <span className="font-mono">{AZTEC_TOKEN_ADDRESS}</span>
           </p>
+          {data?.lastUpdated && (
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+              Last updated:{" "}
+              {format(new Date(data.lastUpdated), "PPpp")}
+            </p>
+          )}
         </header>
 
         {stats && (

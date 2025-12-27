@@ -1,8 +1,31 @@
-import { TokenHolder } from '@/types/atp';
-import { formatTokenAmount, truncateAddress } from '@/lib/utils';
+import { HolderType, TokenHolder } from "@/types/atp";
+import { formatTokenAmount, truncateAddress } from "@/lib/utils";
 
 interface TokenHoldersListProps {
   holders: TokenHolder[];
+}
+
+function getHolderTypeBadge(type?: HolderType) {
+  switch (type) {
+    case "atp":
+      return (
+        <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+          ATP
+        </span>
+      );
+    case "contract":
+      return (
+        <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+          Contract
+        </span>
+      );
+    default:
+      return (
+        <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+          User
+        </span>
+      );
+  }
 }
 
 export default function TokenHoldersList({ holders }: TokenHoldersListProps) {
@@ -35,7 +58,7 @@ export default function TokenHoldersList({ holders }: TokenHoldersListProps) {
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
                   {index + 1}
                 </div>
-                <div>
+                <div className="flex flex-col">
                   <a
                     href={`https://etherscan.io/address/${holder.address}`}
                     target="_blank"
@@ -44,6 +67,7 @@ export default function TokenHoldersList({ holders }: TokenHoldersListProps) {
                   >
                     {truncateAddress(holder.address)}
                   </a>
+                  {getHolderTypeBadge(holder.type)}
                 </div>
               </div>
               <div className="text-right">

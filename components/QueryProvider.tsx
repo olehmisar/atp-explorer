@@ -10,8 +10,6 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
         defaultOptions: {
           queries: {
             // With server-side caching, we can use stale data
-            staleTime: 1000 * 60 * 15, // 15 minutes (matches Redis cache TTL)
-            refetchOnWindowFocus: false,
             retry: 1,
           },
         },
