@@ -158,13 +158,13 @@ export default function ATPTable({ atps }: ATPTableProps) {
                       {/* fullUnlock is already in milliseconds */}
                       <span>
                         {format(
-                          new Date(atp.unlockSchedule.fullUnlock),
+                          new Date(Math.floor(atp.unlockSchedule.fullUnlock)),
                           "MMM dd, yyyy",
                         )}
                       </span>
                       <span className="text-xs text-gray-500 dark:text-gray-400">
                         {format(
-                          new Date(atp.unlockSchedule.fullUnlock),
+                          new Date(Math.floor(atp.unlockSchedule.fullUnlock)),
                           "HH:mm",
                         )}
                       </span>

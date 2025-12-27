@@ -60,9 +60,9 @@ const ATP_ABI = [
     inputs: [],
     outputs: [
       { name: "startTime", type: "uint256" },
-      { name: "cliffDuration", type: "uint256" },
-      { name: "lockDuration", type: "uint256" },
-      { name: "amount", type: "uint256" },
+      { name: "cliff", type: "uint256" },
+      { name: "endTime", type: "uint256" },
+      { name: "allocation", type: "uint256" },
     ],
     stateMutability: "view",
   },
@@ -281,8 +281,8 @@ export async function fetchATPData(
     const atpType = atpTypeMap[Number(typeValue)] || ATPType.Linear;
 
     // Convert all BigInt values to strings for JSON serialization
-    // globalLock is a tuple: [startTime, cliffDuration, lockDuration, amount]
-    // Contract returns values in SECONDS, convert to MILLISECONDS here
+    // globalLock returns Lock struct: [startTime, cliff, endTime, allocation]
+    // All values are in SECONDS (Unix timestamps for startTime/cliff/endTime)
     const globalLockTuple = globalLockValue as readonly [
       bigint,
       bigint,
@@ -290,10 +290,20 @@ export async function fetchATPData(
       bigint,
     ];
 
+    // Contract returns Lock struct: {startTime, cliff, endTime, allocation}
+    const startTimeSeconds = Number(globalLockTuple[0]);
+    const cliffSeconds = Number(globalLockTuple[1]); // This is cliff timestamp, not duration!
+    const endTimeSeconds = Number(globalLockTuple[2]); // This is endTime timestamp, not duration!
+    const lockAmount = globalLockTuple[3];
+
+    // Calculate durations from timestamps
+    const cliffDurationSeconds = cliffSeconds - startTimeSeconds;
+    const lockDurationSeconds = endTimeSeconds - startTimeSeconds;
+
     // Convert from seconds (RPC) to milliseconds (JavaScript standard)
-    const startTime = Number(globalLockTuple[0]) * 1000; // Convert seconds to milliseconds
-    const cliffDuration = Number(globalLockTuple[1]) * 1000; // Convert seconds to milliseconds
-    const lockDuration = Number(globalLockTuple[2]) * 1000; // Convert seconds to milliseconds
+    const startTime = startTimeSeconds * 1000; // Convert seconds to milliseconds
+    const cliffDuration = cliffDurationSeconds * 1000; // Duration in milliseconds
+    const lockDuration = lockDurationSeconds * 1000; // Duration in milliseconds
 
     return {
       address: atpAddress,
@@ -319,9 +329,9 @@ export async function fetchATPData(
       isRevoked,
       globalLock: {
         startTime, // Unix timestamp in milliseconds
-        cliffDuration, // Duration in milliseconds
-        lockDuration, // Duration in milliseconds
-        amount: globalLockTuple[3].toString(), // Convert BigInt to string for JSON serialization
+        cliffDuration, // Duration in milliseconds (cliff - startTime)
+        lockDuration, // Duration in milliseconds (endTime - startTime)
+        amount: lockAmount.toString(), // Convert BigInt to string for JSON serialization
       },
       milestoneId,
       milestoneStatus,

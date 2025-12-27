@@ -6,82 +6,82 @@
  * actual on-chain queries using the patterns shown here.
  */
 
-import { createPublicClient, http, Address } from 'viem';
-import { mainnet } from 'viem/chains';
-import { ATPData, ATPType } from '@/types/atp';
+import { ATPData, ATPType } from "@/types/atp";
+import { Address, createPublicClient, http } from "viem";
+import { mainnet } from "viem/chains";
 
 // Example: ATP contract ABI (simplified - add all required functions)
 const ATP_ABI = [
   {
-    name: 'getType',
-    type: 'function',
+    name: "getType",
+    type: "function",
     inputs: [],
-    outputs: [{ name: '', type: 'uint8' }],
-    stateMutability: 'view',
+    outputs: [{ name: "", type: "uint8" }],
+    stateMutability: "view",
   },
   {
-    name: 'getBeneficiary',
-    type: 'function',
+    name: "getBeneficiary",
+    type: "function",
     inputs: [],
-    outputs: [{ name: '', type: 'address' }],
-    stateMutability: 'view',
+    outputs: [{ name: "", type: "address" }],
+    stateMutability: "view",
   },
   {
-    name: 'getAllocation',
-    type: 'function',
+    name: "getAllocation",
+    type: "function",
     inputs: [],
-    outputs: [{ name: '', type: 'uint256' }],
-    stateMutability: 'view',
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
   },
   {
-    name: 'getClaimed',
-    type: 'function',
+    name: "getClaimed",
+    type: "function",
     inputs: [],
-    outputs: [{ name: '', type: 'uint256' }],
-    stateMutability: 'view',
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
   },
   {
-    name: 'getClaimable',
-    type: 'function',
+    name: "getClaimable",
+    type: "function",
     inputs: [],
-    outputs: [{ name: '', type: 'uint256' }],
-    stateMutability: 'view',
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
   },
   {
-    name: 'getIsRevokable',
-    type: 'function',
+    name: "getIsRevokable",
+    type: "function",
     inputs: [],
-    outputs: [{ name: '', type: 'bool' }],
-    stateMutability: 'view',
+    outputs: [{ name: "", type: "bool" }],
+    stateMutability: "view",
   },
   {
-    name: 'getIsRevoked',
-    type: 'function',
+    name: "getIsRevoked",
+    type: "function",
     inputs: [],
-    outputs: [{ name: '', type: 'bool' }],
-    stateMutability: 'view',
+    outputs: [{ name: "", type: "bool" }],
+    stateMutability: "view",
   },
   {
-    name: 'getGlobalLock',
-    type: 'function',
+    name: "getGlobalLock",
+    type: "function",
     inputs: [],
     outputs: [
-      { name: 'startTime', type: 'uint256' },
-      { name: 'cliffDuration', type: 'uint256' },
-      { name: 'lockDuration', type: 'uint256' },
-      { name: 'amount', type: 'uint256' },
+      { name: "startTime", type: "uint256" },
+      { name: "cliff", type: "uint256" },
+      { name: "endTime", type: "uint256" },
+      { name: "allocation", type: "uint256" },
     ],
-    stateMutability: 'view',
+    stateMutability: "view",
   },
 ] as const;
 
 const ERC20_ABI = [
   {
-    name: 'balanceOf',
-    type: 'function',
-    inputs: [{ name: 'account', type: 'address' }],
-    outputs: [{ name: '', type: 'uint256' }],
-    stateMutability: 'view',
+    name: "balanceOf",
+    type: "function",
+    inputs: [{ name: "account", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
   },
 ] as const;
 
@@ -91,67 +91,81 @@ const ERC20_ABI = [
 function createClient() {
   return createPublicClient({
     chain: mainnet,
-    transport: http(process.env.RPC_URL || 'https://eth.llamarpc.com'),
+    transport: http(process.env.RPC_URL || "https://eth.llamarpc.com"),
   });
 }
 
 /**
  * Fetch ATP data from a contract address
  */
-export async function fetchATPData(atpAddress: Address, tokenAddress: Address): Promise<ATPData> {
+export async function fetchATPData(
+  atpAddress: Address,
+  tokenAddress: Address,
+): Promise<ATPData> {
   const client = createClient();
 
   try {
     // Fetch all ATP data in parallel
-    const [type, beneficiary, allocation, claimed, claimable, isRevokable, isRevoked, globalLock, balance] =
-      await Promise.all([
-        client.readContract({
+    const [
+      type,
+      beneficiary,
+      allocation,
+      claimed,
+      claimable,
+      isRevokable,
+      isRevoked,
+      globalLock,
+      balance,
+    ] = await Promise.all([
+      client.readContract({
+        address: atpAddress,
+        abi: ATP_ABI,
+        functionName: "getType",
+      }),
+      client.readContract({
+        address: atpAddress,
+        abi: ATP_ABI,
+        functionName: "getBeneficiary",
+      }),
+      client.readContract({
+        address: atpAddress,
+        abi: ATP_ABI,
+        functionName: "getAllocation",
+      }),
+      client.readContract({
+        address: atpAddress,
+        abi: ATP_ABI,
+        functionName: "getClaimed",
+      }),
+      client.readContract({
+        address: atpAddress,
+        abi: ATP_ABI,
+        functionName: "getClaimable",
+      }),
+      client.readContract({
+        address: atpAddress,
+        abi: ATP_ABI,
+        functionName: "getIsRevokable",
+      }),
+      client
+        .readContract({
           address: atpAddress,
           abi: ATP_ABI,
-          functionName: 'getType',
-        }),
-        client.readContract({
-          address: atpAddress,
-          abi: ATP_ABI,
-          functionName: 'getBeneficiary',
-        }),
-        client.readContract({
-          address: atpAddress,
-          abi: ATP_ABI,
-          functionName: 'getAllocation',
-        }),
-        client.readContract({
-          address: atpAddress,
-          abi: ATP_ABI,
-          functionName: 'getClaimed',
-        }),
-        client.readContract({
-          address: atpAddress,
-          abi: ATP_ABI,
-          functionName: 'getClaimable',
-        }),
-        client.readContract({
-          address: atpAddress,
-          abi: ATP_ABI,
-          functionName: 'getIsRevokable',
-        }),
-        client.readContract({
-          address: atpAddress,
-          abi: ATP_ABI,
-          functionName: 'getIsRevoked',
-        }).catch(() => false), // Some ATPs might not have this function
-        client.readContract({
-          address: atpAddress,
-          abi: ATP_ABI,
-          functionName: 'getGlobalLock',
-        }),
-        client.readContract({
-          address: tokenAddress,
-          abi: ERC20_ABI,
-          functionName: 'balanceOf',
-          args: [atpAddress],
-        }),
-      ]);
+          functionName: "getIsRevoked",
+        })
+        .catch(() => false), // Some ATPs might not have this function
+      client.readContract({
+        address: atpAddress,
+        abi: ATP_ABI,
+        functionName: "getGlobalLock",
+      }),
+      client.readContract({
+        address: tokenAddress,
+        abi: ERC20_ABI,
+        functionName: "balanceOf",
+        args: [atpAddress],
+      }),
+    ]);
 
     // Map type enum to ATPType
     const atpTypeMap: Record<number, ATPType> = {
@@ -159,6 +173,22 @@ export async function fetchATPData(atpAddress: Address, tokenAddress: Address): 
       1: ATPType.Milestone,
       2: ATPType.NonClaim,
     };
+
+    // Contract returns Lock struct: [startTime, cliff, endTime, allocation]
+    // All values are in seconds (Unix timestamps for startTime/cliff/endTime)
+    const startTimeSeconds = Number(globalLock[0]);
+    const cliffSeconds = Number(globalLock[1]); // This is cliff timestamp, not duration!
+    const endTimeSeconds = Number(globalLock[2]); // This is endTime timestamp, not duration!
+    const lockAmount = globalLock[3];
+
+    // Calculate durations from timestamps
+    const cliffDurationSeconds = cliffSeconds - startTimeSeconds;
+    const lockDurationSeconds = endTimeSeconds - startTimeSeconds;
+
+    // Convert from seconds (RPC) to milliseconds (JavaScript standard)
+    const startTime = startTimeSeconds * 1000;
+    const cliffDuration = cliffDurationSeconds * 1000;
+    const lockDuration = lockDurationSeconds * 1000;
 
     return {
       address: atpAddress,
@@ -171,10 +201,10 @@ export async function fetchATPData(atpAddress: Address, tokenAddress: Address): 
       isRevokable: isRevokable as boolean,
       isRevoked: (isRevoked as boolean) || false,
       globalLock: {
-        startTime: Number(globalLock[0]),
-        cliffDuration: Number(globalLock[1]),
-        lockDuration: Number(globalLock[2]),
-        amount: globalLock[3],
+        startTime, // Unix timestamp in milliseconds
+        cliffDuration, // Duration in milliseconds (cliff - startTime)
+        lockDuration, // Duration in milliseconds (endTime - startTime)
+        amount: lockAmount.toString(), // Convert BigInt to string
       },
     };
   } catch (error) {

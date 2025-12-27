@@ -31,11 +31,12 @@ export function calculateUnlockSchedule(
 ): UnlockSchedule {
   // All timestamps are now in milliseconds (converted from seconds in atp-detector.ts)
   const startTime = Number(lock.startTime); // Unix timestamp in milliseconds
-  const cliffDuration = Number(lock.cliffDuration); // Duration in milliseconds
-  const lockDuration = Number(lock.lockDuration); // Duration in milliseconds
+  const cliffDuration = Number(lock.cliffDuration); // Duration in milliseconds (cliff - startTime)
+  const lockDuration = Number(lock.lockDuration); // Duration in milliseconds (endTime - startTime)
 
-  const cliffEnd = startTime + cliffDuration; // Timestamp in milliseconds
-  const fullUnlock = startTime + cliffDuration + lockDuration; // Timestamp in milliseconds
+  // Calculate timestamps
+  const cliffEnd = startTime + cliffDuration; // Cliff timestamp in milliseconds
+  const fullUnlock = startTime + lockDuration; // End timestamp in milliseconds (not startTime + cliffDuration + lockDuration!)
   const amount = BigInt(lock.amount);
 
   let currentUnlocked: bigint;
@@ -51,17 +52,27 @@ export function calculateUnlockSchedule(
     fullyUnlocked = true;
   } else {
     // Linear unlock between cliff end and full unlock
-    // Matches LockLib.unlockedAt() calculation: (elapsed / lockDuration) * amount
-    const elapsed = currentTime - cliffEnd;
-    const totalUnlockDuration = lock.lockDuration;
+    // Matches LockLib.unlockedAt() calculation exactly:
+    // unlockedAt = (allocation * (timestamp - startTime)) / (endTime - startTime)
+    // Note: The formula uses (timestamp - startTime), NOT (timestamp - cliff)!
+    const elapsedFromStart = currentTime - startTime; // milliseconds since startTime
+    const totalLockDuration = lockDuration; // milliseconds (endTime - startTime)
 
     // Use BigInt for precision to match Solidity arithmetic
-    const elapsedBigInt = BigInt(Math.floor(elapsed));
-    const durationBigInt = BigInt(totalUnlockDuration);
+    // Convert milliseconds to seconds for calculation (to match contract which uses seconds)
+    const elapsedFromStartSeconds = Math.floor(elapsedFromStart / 1000);
+    const totalLockDurationSeconds = Math.floor(totalLockDuration / 1000);
 
-    // Calculate: (amount * elapsed) / lockDuration
-    // This matches the contract's unlockedAt calculation
-    currentUnlocked = (amount * elapsedBigInt) / durationBigInt;
+    const elapsedBigInt = BigInt(elapsedFromStartSeconds);
+    const durationBigInt = BigInt(totalLockDurationSeconds);
+
+    // Calculate: (amount * (timestamp - startTime)) / (endTime - startTime)
+    // This matches the contract's unlockedAt calculation exactly
+    if (durationBigInt === BigInt(0)) {
+      currentUnlocked = BigInt(0);
+    } else {
+      currentUnlocked = (amount * elapsedBigInt) / durationBigInt;
+    }
 
     // Cap at amount (safety check, should not be needed)
     if (currentUnlocked > amount) {
