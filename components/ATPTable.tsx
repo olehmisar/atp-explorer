@@ -1,6 +1,9 @@
+"use client";
+
 import { formatAddress, formatTokenAmount } from "@/lib/utils";
 import { ATPData, ATPType } from "@/types/atp";
 import { format } from "date-fns";
+import ATPUnlockChart from "./ATPUnlockChart";
 
 interface ATPTableProps {
   atps: ATPData[];
@@ -76,6 +79,9 @@ export default function ATPTable({ atps }: ATPTableProps) {
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-64">
+                Chart
               </th>
             </tr>
           </thead>
@@ -199,6 +205,9 @@ export default function ATPTable({ atps }: ATPTableProps) {
                       </span>
                     )}
                   </div>
+                </td>
+                <td className="px-6 py-4">
+                  <ATPUnlockChart atp={atp} />
                 </td>
               </tr>
             ))}

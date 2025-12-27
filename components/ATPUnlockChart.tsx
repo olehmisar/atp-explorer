@@ -1,0 +1,112 @@
+import { generateUnlockPoints } from "@/lib/unlock-calculator";
+import { formatTokenAmount } from "@/lib/utils";
+import { ATPData } from "@/types/atp";
+import { format } from "date-fns";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+
+interface ATPUnlockChartProps {
+  atp: ATPData;
+}
+
+export default function ATPUnlockChart({ atp }: ATPUnlockChartProps) {
+  if (!atp.globalLock) {
+    return (
+      <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+        No lock data available for this ATP
+      </div>
+    );
+  }
+
+  // Calculate time range for this ATP
+  const now = Date.now(); // Current time in milliseconds
+  const startTime = Number(atp.globalLock.startTime);
+  // lockDuration is the total duration from startTime to endTime
+  const endTime = startTime + Number(atp.globalLock.lockDuration);
+
+  // Extend range a bit for better visualization
+  const chartStartTime = Math.min(startTime, now) - 86400 * 30 * 1000; // 30 days before (in ms)
+  const chartEndTime = Math.max(endTime, now) + 86400 * 90 * 1000; // 90 days after (in ms)
+
+  // Generate unlock points for this single ATP
+  const unlockPoints = generateUnlockPoints(
+    [atp.globalLock],
+    chartStartTime,
+    chartEndTime,
+    100,
+  );
+
+  // Format data for chart
+  const chartData = unlockPoints.map((point) => ({
+    time: point.timestamp, // Already in milliseconds
+    timestamp: point.timestamp,
+    unlocked: formatTokenAmount(point.unlocked),
+    unlockedRaw: Number(point.unlocked) / 1e18, // Convert to number for chart (assuming 18 decimals)
+  }));
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded shadow-lg">
+          <p className="font-semibold">{format(new Date(data.time), "PPpp")}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Unlocked: {data.unlocked} AZTEC
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <div className="w-64">
+      <ResponsiveContainer width="100%" height={120}>
+        <LineChart data={chartData}>
+          <CartesianGrid
+            strokeDasharray="3 3"
+            className="stroke-gray-300 dark:stroke-gray-700"
+          />
+          <XAxis
+            dataKey="time"
+            type="number"
+            scale="time"
+            domain={[chartStartTime, chartEndTime]}
+            tickFormatter={(value) => format(new Date(value), "MMM yyyy")}
+            className="text-xs"
+            height={30}
+          />
+          <YAxis
+            tickFormatter={(value) => {
+              const num = value as number;
+              if (num >= 1e9) return `${(num / 1e9).toFixed(1)}B`;
+              if (num >= 1e6) return `${(num / 1e6).toFixed(1)}M`;
+              if (num >= 1e3) return `${(num / 1e3).toFixed(1)}K`;
+              return num.toFixed(0);
+            }}
+            className="text-xs"
+            width={40}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Line
+            type="monotone"
+            dataKey="unlockedRaw"
+            stroke="#3B82F6"
+            strokeWidth={1.5}
+            dot={false}
+            name="Unlocked AZTEC"
+            yAxisId={0}
+            connectNulls={false}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
