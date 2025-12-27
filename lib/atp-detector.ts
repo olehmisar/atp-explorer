@@ -282,12 +282,18 @@ export async function fetchATPData(
 
     // Convert all BigInt values to strings for JSON serialization
     // globalLock is a tuple: [startTime, cliffDuration, lockDuration, amount]
+    // Contract returns values in SECONDS, convert to MILLISECONDS here
     const globalLockTuple = globalLockValue as readonly [
       bigint,
       bigint,
       bigint,
       bigint,
     ];
+
+    // Convert from seconds (RPC) to milliseconds (JavaScript standard)
+    const startTime = Number(globalLockTuple[0]) * 1000; // Convert seconds to milliseconds
+    const cliffDuration = Number(globalLockTuple[1]) * 1000; // Convert seconds to milliseconds
+    const lockDuration = Number(globalLockTuple[2]) * 1000; // Convert seconds to milliseconds
 
     return {
       address: atpAddress,
@@ -312,9 +318,9 @@ export async function fetchATPData(
       isRevokable: isRevokableValue as boolean,
       isRevoked,
       globalLock: {
-        startTime: Number(globalLockTuple[0]),
-        cliffDuration: Number(globalLockTuple[1]),
-        lockDuration: Number(globalLockTuple[2]),
+        startTime, // Unix timestamp in milliseconds
+        cliffDuration, // Duration in milliseconds
+        lockDuration, // Duration in milliseconds
         amount: globalLockTuple[3].toString(), // Convert BigInt to string for JSON serialization
       },
       milestoneId,

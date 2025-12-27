@@ -4,6 +4,8 @@ import ATPTable from "@/components/ATPTable";
 import StatsCards from "@/components/StatsCards";
 import TokenHoldersList from "@/components/TokenHoldersList";
 import TypeDistribution from "@/components/TypeDistribution";
+import UnlockChart from "@/components/UnlockChart";
+import UnlockStats from "@/components/UnlockStats";
 import { AZTEC_TOKEN_ADDRESS } from "@/lib/constants";
 import { ATPDashboardData, ATPData, ATPStats } from "@/types/atp";
 import { useEffect, useState } from "react";
@@ -105,6 +107,14 @@ export default function Home() {
             </div>
           </>
         )}
+
+        <div className="mt-8">
+          <UnlockStats atps={atps} />
+        </div>
+
+        <div className="mt-8">
+          <UnlockChart atps={atps} />
+        </div>
 
         <div className="mt-8">
           <ATPTable atps={atps} />

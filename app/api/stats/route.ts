@@ -1,6 +1,7 @@
 import { discoverATPs, fetchATPData } from "@/lib/atp-detector";
 import { AZTEC_TOKEN_ADDRESS, MAX_ATP_CHECK } from "@/lib/constants";
 import { getTokenHolders } from "@/lib/moralis";
+import { calculateUnlockSchedule } from "@/lib/unlock-calculator";
 import { ATPData, ATPStats, ATPType, TokenHolder } from "@/types/atp";
 import { NextResponse } from "next/server";
 import { Address } from "viem";
@@ -131,7 +132,12 @@ export async function GET() {
     const atps: ATPData[] = [];
     atpDataResults.forEach((result, index) => {
       if (result.status === "fulfilled" && result.value) {
-        atps.push(result.value);
+        const atp = result.value;
+        // Calculate unlock schedule if globalLock exists
+        if (atp.globalLock) {
+          atp.unlockSchedule = calculateUnlockSchedule(atp.globalLock);
+        }
+        atps.push(atp);
       } else {
         console.error(
           `Failed to fetch data for ATP ${atpAddresses[index]}:`,
