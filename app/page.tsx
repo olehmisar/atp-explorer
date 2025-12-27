@@ -91,8 +91,7 @@ export default function Home() {
           </p>
           {data?.lastUpdated && (
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              Last updated:{" "}
-              {format(new Date(data.lastUpdated), "PPpp")}
+              Last updated: {format(new Date(data.lastUpdated), "PPpp")}
             </p>
           )}
         </header>
