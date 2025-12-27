@@ -17,7 +17,7 @@ export const ADDRESS_NAMES: Record<string, string> = {
 };
 
 // Default number of addresses to check for ATP contracts
-export const DEFAULT_MAX_ATP_CHECK = 50;
+const DEFAULT_MAX_ATP_CHECK = 1000;
 
 // Maximum number of addresses to check for ATP contracts (from env or default)
 export const MAX_ATP_CHECK = parseInt(

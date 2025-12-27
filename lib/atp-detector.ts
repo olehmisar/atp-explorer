@@ -92,7 +92,9 @@ const ERC20_ABI = [
 function createClient() {
   return createPublicClient({
     batch: {
-      multicall: true,
+      multicall: {
+        batchSize: 10000,
+      },
     },
     chain: mainnet,
     transport: http(process.env.RPC_URL || "https://eth.llamarpc.com"),

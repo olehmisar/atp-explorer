@@ -2,11 +2,14 @@ import { discoverATPs, fetchATPData } from "@/lib/atp-detector";
 import { AZTEC_TOKEN_ADDRESS } from "@/lib/constants";
 import { getTokenHolders } from "@/lib/moralis";
 import {
+  getCachedHolders,
   redis,
   setCachedATPs,
   setCachedHolders,
   setCachedStats,
+  setHoldersLastRefresh,
   setLastRefresh,
+  shouldSkipHoldersRefresh,
   shouldSkipRefresh,
 } from "@/lib/redis";
 import { calculateUnlockSchedule } from "@/lib/unlock-calculator";
@@ -107,9 +110,24 @@ function calculateATPStats(atps: ATPData[]): Omit<ATPStats, "tokenHolders"> {
 
 /**
  * Refresh cache - Step 1: Fetch and cache holders
+ * Uses separate last refresh timestamp for holders
  */
 async function refreshHolders(): Promise<TokenHolder[]> {
-  console.log("Step 1: Fetching token holders from Moralis...");
+  console.log("Step 1: Checking holders cache...");
+
+  // Check if holders refresh should be skipped
+  const skipHolders = await shouldSkipHoldersRefresh();
+  if (skipHolders) {
+    console.log("Skipping holders refresh - data was recently refreshed");
+    const cached = await getCachedHolders();
+    if (cached && Array.isArray(cached) && cached.length > 0) {
+      console.log(`Using cached holders: ${cached.length} holders`);
+      return cached as TokenHolder[];
+    }
+    console.log("No cached holders found, fetching fresh data...");
+  }
+
+  console.log("Fetching token holders from Moralis...");
 
   let holders: TokenHolder[] = [];
 
@@ -126,9 +144,10 @@ async function refreshHolders(): Promise<TokenHolder[]> {
     }
   }
 
-  // Cache holders
+  // Cache holders and update holders last refresh timestamp
   await setCachedHolders(holders);
-  console.log("Step 1 complete: Holders cached");
+  await setHoldersLastRefresh(Math.floor(Date.now() / 1000));
+  console.log("Step 1 complete: Holders cached with separate last refresh timestamp");
 
   return holders;
 }

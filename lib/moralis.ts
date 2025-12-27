@@ -1,3 +1,4 @@
+import { MAX_ATP_CHECK } from "@/lib/constants";
 import { withRetry } from "@/lib/retry";
 import { TokenHolder } from "@/types/atp";
 import Moralis from "moralis";
@@ -12,57 +13,101 @@ export async function initializeMoralis() {
 }
 
 /**
- * Fetch a single page of token owners
+ * Fetch a single page of token owners with retry logic
  */
 async function fetchTokenOwnersPage(
   tokenAddress: string,
   chain: string,
   cursor?: string,
 ): Promise<{ owners: TokenHolder[]; cursor?: string }> {
-  await initializeMoralis();
+  return withRetry(async () => {
+    await initializeMoralis();
 
-  const response = await Moralis.EvmApi.token.getTokenOwners({
-    tokenAddress: tokenAddress,
-    chain: chain,
-    limit: 100, // Maximum page size
-    cursor: cursor,
+    const response = await Moralis.EvmApi.token.getTokenOwners({
+      tokenAddress: tokenAddress,
+      chain: chain,
+      limit: 100, // Maximum page size
+      cursor: cursor,
+    });
+
+    const result = response.raw();
+    const owners = result.result || [];
+    const nextCursor = result.cursor;
+
+    const tokenHolders: TokenHolder[] = owners.map((owner) => ({
+      address: owner.owner_address,
+      balance: owner.balance,
+      tokenAddress: tokenAddress,
+    }));
+
+    return {
+      owners: tokenHolders,
+      cursor: nextCursor,
+    };
   });
-
-  const result = response.raw();
-  const owners = result.result || [];
-  const nextCursor = result.cursor;
-
-  const tokenHolders: TokenHolder[] = owners.map((owner) => ({
-    address: owner.owner_address,
-    balance: owner.balance,
-    tokenAddress: tokenAddress,
-  }));
-
-  return {
-    owners: tokenHolders,
-    cursor: nextCursor,
-  };
 }
 
 /**
- * Fetch token holders (limited to 100 for performance)
- * Uses retry logic for reliability
+ * Fetch token holders with pagination
+ * Loops through all pages, then slices to MAX_ATP_CHECK limit
  */
 export async function getTokenHolders(
   tokenAddress: string,
   chain: string = "0x1", // Default to Ethereum mainnet (chain ID as hex string)
-  limit: number = 100, // Limit to 100 holders for performance
 ): Promise<TokenHolder[]> {
-  return withRetry(async () => {
-    await initializeMoralis();
+  const allHolders: TokenHolder[] = [];
+  let cursor: string | undefined = undefined;
+  let pageCount = 0;
 
-    // Fetch only the first page (up to 100 holders)
-    const { owners } = await fetchTokenOwnersPage(tokenAddress, chain);
+  try {
+    while (true) {
+      pageCount++;
+      console.log(
+        `Fetching token holders page ${pageCount}${
+          cursor ? ` (cursor: ${cursor.substring(0, 20)}...)` : ""
+        }...`,
+      );
 
-    console.log(`Fetched ${owners.length} token holders (limited to ${limit})`);
+      const { owners, cursor: nextCursor } = await fetchTokenOwnersPage(
+        tokenAddress,
+        chain,
+        cursor,
+      );
 
-    return owners.slice(0, limit);
-  });
+      allHolders.push(...owners);
+      console.log(
+        `Page ${pageCount}: Fetched ${owners.length} holders (total: ${allHolders.length})`,
+      );
+
+      // Stop if no more pages or if we have enough holders
+      if (!nextCursor || allHolders.length >= MAX_ATP_CHECK) {
+        break;
+      }
+
+      cursor = nextCursor;
+
+      // Small delay between pages to avoid rate limiting
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+
+    // Slice to limit at the end
+    const limited = allHolders.slice(0, MAX_ATP_CHECK);
+    console.log(
+      `Finished fetching token holders: ${allHolders.length} total, returning ${limited.length} (limited to ${MAX_ATP_CHECK})`,
+    );
+
+    return limited;
+  } catch (error) {
+    console.error("Error in getTokenHolders:", error);
+    // Return what we have so far, sliced to limit
+    if (allHolders.length > 0) {
+      console.warn(
+        `Returning partial results: ${allHolders.length} holders fetched before error`,
+      );
+      return allHolders.slice(0, MAX_ATP_CHECK);
+    }
+    throw error;
+  }
 }
 
 export async function getTokenMetadata(
