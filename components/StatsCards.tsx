@@ -1,97 +1,57 @@
-import { formatTokenAmount } from "@/lib/utils";
-import { ATPStats } from "@/types/atp";
+import { ATPStats } from '@/types/atp';
+import { formatTokenAmount } from '@/lib/utils';
 
 interface StatsCardsProps {
   stats: ATPStats;
 }
 
-// Simple tooltip component with icon
-const Tooltip = ({
-  children,
-  content,
-}: {
-  children: React.ReactNode;
-  content: string;
-}) => {
-  return (
-    <div className="flex items-center gap-1 cursor-help" title={content}>
-      {children}
-      <svg
-        className="w-3 h-3 text-gray-400"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-    </div>
-  );
-};
-
 export default function StatsCards({ stats }: StatsCardsProps) {
   const cards = [
     {
-      title: "Total ATPs",
+      title: 'Total ATPs',
       value: stats.totalATPs.toString(),
-      subtitle: "Active positions",
-      color: "blue",
-      tooltip:
-        "Total number of Aztec Token Position (ATP) contracts discovered. ATPs are vaults that hold locked AZTEC tokens.",
+      subtitle: 'Active positions',
+      color: 'blue',
     },
     {
-      title: "Total Allocation",
+      title: 'Total Allocation',
       value: formatTokenAmount(stats.totalAllocation),
-      subtitle: "AZTEC tokens",
-      color: "green",
-      tooltip:
-        "Total amount of AZTEC tokens allocated across all ATPs. This is the maximum amount that can be unlocked over time.",
+      subtitle: 'AZTEC tokens',
+      color: 'green',
     },
     {
-      title: "Total Claimed",
+      title: 'Total Claimed',
       value: formatTokenAmount(stats.totalClaimed),
-      subtitle: "AZTEC tokens",
-      color: "purple",
-      tooltip:
-        "Total amount of AZTEC tokens that have been claimed by beneficiaries from all ATPs.",
+      subtitle: 'AZTEC tokens',
+      color: 'purple',
     },
     {
-      title: "Total Claimable",
+      title: 'Total Claimable',
       value: formatTokenAmount(stats.totalClaimable),
-      subtitle: "AZTEC tokens",
-      color: "orange",
-      tooltip:
-        "Total amount of AZTEC tokens that are currently available to be claimed by beneficiaries across all ATPs.",
+      subtitle: 'AZTEC tokens',
+      color: 'orange',
     },
     {
-      title: "Total Balance",
+      title: 'Total Balance',
       value: formatTokenAmount(stats.totalBalance),
-      subtitle: "AZTEC tokens",
-      color: "indigo",
-      tooltip:
-        "Total current balance of AZTEC tokens held in all ATP contracts. This may differ from allocation due to claims or other transfers.",
+      subtitle: 'AZTEC tokens',
+      color: 'indigo',
     },
     {
-      title: "Token Holders",
+      title: 'Token Holders',
       value: stats.tokenHolders.total.toString(),
-      subtitle: "Unique addresses",
-      color: "pink",
-      tooltip:
-        "Total number of unique addresses that hold AZTEC tokens. This includes ATP contracts, regular users, and other contracts.",
+      subtitle: 'Unique addresses',
+      color: 'pink',
     },
   ];
 
   const colorClasses = {
-    blue: "bg-blue-500 dark:bg-blue-600",
-    green: "bg-green-500 dark:bg-green-600",
-    purple: "bg-purple-500 dark:bg-purple-600",
-    orange: "bg-orange-500 dark:bg-orange-600",
-    indigo: "bg-indigo-500 dark:bg-indigo-600",
-    pink: "bg-pink-500 dark:bg-pink-600",
+    blue: 'bg-blue-500 dark:bg-blue-600',
+    green: 'bg-green-500 dark:bg-green-600',
+    purple: 'bg-purple-500 dark:bg-purple-600',
+    orange: 'bg-orange-500 dark:bg-orange-600',
+    indigo: 'bg-indigo-500 dark:bg-indigo-600',
+    pink: 'bg-pink-500 dark:bg-pink-600',
   };
 
   return (
@@ -102,16 +62,10 @@ export default function StatsCards({ stats }: StatsCardsProps) {
           className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700"
         >
           <div className="flex items-center justify-between mb-4">
-            <Tooltip content={card.tooltip}>
-              <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                {card.title}
-              </h3>
-            </Tooltip>
-            <div
-              className={`w-3 h-3 rounded-full ${
-                colorClasses[card.color as keyof typeof colorClasses]
-              }`}
-            ></div>
+            <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              {card.title}
+            </h3>
+            <div className={`w-3 h-3 rounded-full ${colorClasses[card.color as keyof typeof colorClasses]}`}></div>
           </div>
           <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
             {card.value}

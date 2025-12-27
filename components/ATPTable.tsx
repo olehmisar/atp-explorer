@@ -3,8 +3,7 @@
 import { formatAddress, formatTokenAmount } from "@/lib/utils";
 import { ATPData, ATPType } from "@/types/atp";
 import { format } from "date-fns";
-import { useMemo, useState, useEffect } from "react";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useMemo, useState } from "react";
 import ATPUnlockChart from "./ATPUnlockChart";
 
 // Simple tooltip component with icon
@@ -55,77 +54,8 @@ function getTypeBadgeColor(type: ATPType): string {
 }
 
 export default function ATPTable({ atps }: ATPTableProps) {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
-
-  // Read initial values from URL params
-  const initialPage = useMemo(() => {
-    const page = searchParams.get("page");
-    return page ? Math.max(1, parseInt(page, 10)) : 1;
-  }, [searchParams]);
-
-  const initialPageSize = useMemo(() => {
-    const perPage = searchParams.get("perPage");
-    if (perPage) {
-      const parsed = parseInt(perPage, 10);
-      return PAGE_SIZE_OPTIONS.includes(parsed) ? parsed : 50;
-    }
-    return 50;
-  }, [searchParams]);
-
-  const [currentPage, setCurrentPage] = useState(initialPage);
-  const [pageSize, setPageSize] = useState(initialPageSize);
-  const [pageInput, setPageInput] = useState(initialPage.toString());
-
-  // Update URL params when page or pageSize changes
-  useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
-
-    if (currentPage > 1) {
-      params.set("page", currentPage.toString());
-    } else {
-      params.delete("page");
-    }
-
-    if (pageSize !== 50) {
-      params.set("perPage", pageSize.toString());
-    } else {
-      params.delete("perPage");
-    }
-
-    const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
-    router.replace(newUrl, { scroll: false });
-  }, [currentPage, pageSize, pathname, router, searchParams]);
-
-  // Sync state with URL params when they change externally (but avoid infinite loops)
-  useEffect(() => {
-    const page = searchParams.get("page");
-    const perPage = searchParams.get("perPage");
-
-    if (page) {
-      const pageNum = Math.max(1, parseInt(page, 10));
-      if (pageNum !== currentPage) {
-        setCurrentPage(pageNum);
-        setPageInput(pageNum.toString());
-      }
-    } else if (currentPage !== 1 && initialPage === 1) {
-      // Only reset if we're not in the middle of updating
-      setCurrentPage(1);
-      setPageInput("1");
-    }
-
-    if (perPage) {
-      const perPageNum = parseInt(perPage, 10);
-      if (PAGE_SIZE_OPTIONS.includes(perPageNum) && perPageNum !== pageSize) {
-        setPageSize(perPageNum);
-      }
-    } else if (pageSize !== 50 && initialPageSize === 50) {
-      // Only reset if we're not in the middle of updating
-      setPageSize(50);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
 
   // Calculate pagination
   const totalPages = Math.ceil(atps.length / pageSize);
@@ -140,19 +70,6 @@ export default function ATPTable({ atps }: ATPTableProps) {
   const handlePageSizeChange = (newPageSize: number) => {
     setPageSize(newPageSize);
     setCurrentPage(1);
-    setPageInput("1");
-  };
-
-  // Sync pageInput with currentPage when it changes externally
-  useEffect(() => {
-    setPageInput(currentPage.toString());
-  }, [currentPage]);
-
-  // Handle page navigation with URL sync
-  const handlePageChange = (newPage: number) => {
-    const validPage = Math.max(1, Math.min(totalPages, newPage));
-    setCurrentPage(validPage);
-    setPageInput(validPage.toString());
   };
 
   if (atps.length === 0) {

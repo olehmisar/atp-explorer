@@ -1,6 +1,5 @@
 "use client";
 
-import { Suspense } from "react";
 import ATPTable from "@/components/ATPTable";
 import StatsCards from "@/components/StatsCards";
 import TokenHoldersList from "@/components/TokenHoldersList";
@@ -117,9 +116,7 @@ export default function Home() {
         </div>
 
         <div className="mt-8">
-          <Suspense fallback={<div className="text-center py-8 text-gray-500">Loading table...</div>}>
-            <ATPTable atps={atps} />
-          </Suspense>
+          <ATPTable atps={atps} />
         </div>
       </div>
     </div>
