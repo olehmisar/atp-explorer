@@ -7,30 +7,19 @@ import TypeDistribution from "@/components/TypeDistribution";
 import UnlockChart from "@/components/UnlockChart";
 import UnlockStats from "@/components/UnlockStats";
 import { AZTEC_TOKEN_ADDRESS } from "@/lib/constants";
-import { ATPDashboardData } from "@/types/atp";
-import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-
-async function fetchATPStats(): Promise<ATPDashboardData> {
-  const response = await fetch("/api/stats");
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch data");
-  }
-
-  return response.json();
-}
+import { useState } from "react";
+import Link from "next/link";
+import { useATPStats } from "@/hooks/useATPStats";
 
 export default function Home() {
+  const [searchAddress, setSearchAddress] = useState("");
   const {
     data,
     isLoading: loading,
     error,
     refetch,
-  } = useQuery({
-    queryKey: ["atp-stats"],
-    queryFn: fetchATPStats,
-  });
+  } = useATPStats();
 
   const stats = data?.stats ?? null;
   const atps = data?.atps ?? [];
@@ -94,6 +83,32 @@ export default function Home() {
               Last updated: {format(new Date(data.lastUpdated), "PPpp")}
             </p>
           )}
+          {/* Search Bar */}
+          <div className="mt-4">
+            <div className="flex gap-2 max-w-md">
+              <input
+                type="text"
+                value={searchAddress}
+                onChange={(e) => setSearchAddress(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && searchAddress.trim()) {
+                    e.preventDefault();
+                    window.location.href = `/atp/${searchAddress.trim()}`;
+                  }
+                }}
+                placeholder="Search ATP by address..."
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <Link
+                href={searchAddress.trim() ? `/atp/${searchAddress.trim()}` : "#"}
+                className={`px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center ${
+                  !searchAddress.trim() ? "opacity-50 cursor-not-allowed pointer-events-none" : ""
+                }`}
+              >
+                Search
+              </Link>
+            </div>
+          </div>
         </header>
 
         {stats && (

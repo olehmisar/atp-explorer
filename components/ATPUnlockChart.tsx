@@ -15,9 +15,10 @@ import {
 
 interface ATPUnlockChartProps {
   atp: ATPData;
+  size?: "small" | "large";
 }
 
-function ATPUnlockChart({ atp }: ATPUnlockChartProps) {
+function ATPUnlockChart({ atp, size = "small" }: ATPUnlockChartProps) {
   // Memoize chart data calculation
   const chartData = useMemo(() => {
     if (!atp.globalLock) {
@@ -51,9 +52,16 @@ function ATPUnlockChart({ atp }: ATPUnlockChartProps) {
     }));
   }, [atp.globalLock]);
 
+  const isLarge = size === "large";
+  const containerClass = isLarge ? "w-full max-w-4xl" : "w-64";
+  const height = isLarge ? 400 : 120;
+  const margin = isLarge
+    ? { top: 10, right: 20, bottom: 30, left: 60 }
+    : { top: 5, right: 5, bottom: 5, left: 50 };
+
   if (!atp.globalLock || !chartData) {
     return (
-      <div className="w-64 text-center text-xs text-gray-500 dark:text-gray-400">
+      <div className={`${containerClass} text-center text-xs text-gray-500 dark:text-gray-400`}>
         No lock data
       </div>
     );
@@ -84,11 +92,11 @@ function ATPUnlockChart({ atp }: ATPUnlockChartProps) {
   };
 
   return (
-    <div className="w-64">
-      <ResponsiveContainer width="100%" height={120}>
+    <div className={containerClass}>
+      <ResponsiveContainer width="100%" height={height}>
         <LineChart
           data={chartData}
-          margin={{ top: 5, right: 5, bottom: 5, left: 50 }}
+          margin={margin}
         >
           <CartesianGrid
             strokeDasharray="3 3"

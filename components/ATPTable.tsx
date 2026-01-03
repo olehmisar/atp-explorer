@@ -4,6 +4,7 @@ import { formatAddress, formatTokenAmount } from "@/lib/utils";
 import { ATPData, ATPType } from "@/types/atp";
 import { format } from "date-fns";
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import ATPUnlockChart from "./ATPUnlockChart";
 
 // Simple tooltip component with icon
@@ -563,6 +564,12 @@ export default function ATPTable({ atps }: ATPTableProps) {
                         >
                           {formatAddress(atp.address)}
                         </a>
+                        <Link
+                          href={`/atp/${atp.address}`}
+                          className="ml-2 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                        >
+                          View Details →
+                        </Link>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-gray-500 dark:text-gray-400">

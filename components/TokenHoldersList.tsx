@@ -1,5 +1,8 @@
+"use client";
+
 import { formatAddress, formatTokenAmount } from "@/lib/utils";
 import { HolderType, TokenHolder } from "@/types/atp";
+import Link from "next/link";
 
 interface TokenHoldersListProps {
   holders: TokenHolder[];
@@ -59,14 +62,25 @@ export default function TokenHoldersList({ holders }: TokenHoldersListProps) {
                   {index + 1}
                 </div>
                 <div className="flex flex-col">
-                  <a
-                    href={`https://etherscan.io/address/${holder.address}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                  >
-                    {formatAddress(holder.address)}
-                  </a>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={`https://etherscan.io/address/${holder.address}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                    >
+                      {formatAddress(holder.address)}
+                    </a>
+                    {holder.type === "atp" && (
+                      <Link
+                        href={`/atp/${holder.address}`}
+                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        View →
+                      </Link>
+                    )}
+                  </div>
                   {getHolderTypeBadge(holder.type)}
                 </div>
               </div>
