@@ -93,14 +93,14 @@ export default function Home() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && searchAddress.trim()) {
                     e.preventDefault();
-                    window.location.href = `/atp/${searchAddress.trim()}`;
+                    window.location.href = `/search/${searchAddress.trim()}`;
                   }
                 }}
-                placeholder="Search ATP by address..."
+                placeholder="Search by ATP address or beneficiary address..."
                 className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <Link
-                href={searchAddress.trim() ? `/atp/${searchAddress.trim()}` : "#"}
+                href={searchAddress.trim() ? `/search/${searchAddress.trim()}` : "#"}
                 className={`px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center ${
                   !searchAddress.trim() ? "opacity-50 cursor-not-allowed pointer-events-none" : ""
                 }`}
