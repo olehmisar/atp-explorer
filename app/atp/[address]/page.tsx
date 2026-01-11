@@ -14,7 +14,7 @@ function getTypeBadgeColor(type: ATPType): string {
     case ATPType.Linear:
       return "bg-lapis/30 text-lapis";
     case ATPType.Milestone:
-      return "bg-malachite/30 text-malachite";
+      return "bg-malachite/30 text-aqua";
     case ATPType.NonClaim:
       return "bg-aubergine/30 text-aqua";
     default:

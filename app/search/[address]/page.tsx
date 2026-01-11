@@ -184,7 +184,7 @@ export default function SearchResultsPage() {
                             ? "bg-[#FFE6E6] text-vermillion"
                             : atp.isRevokable
                             ? "bg-aqua/30 text-aqua"
-                            : "bg-malachite/30 text-malachite"
+                            : "bg-malachite/30 text-aqua"
                         }`}
                       >
                         {atp.isRevoked
