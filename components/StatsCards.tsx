@@ -16,7 +16,7 @@ const Tooltip = ({
     <div className="flex items-center gap-1 cursor-help" title={content}>
       {children}
       <svg
-        className="w-3 h-3 text-gray-400"
+        className="w-3 h-3 text-[#6A6450]"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -82,12 +82,12 @@ export default function StatsCards({ stats }: StatsCardsProps) {
   ];
 
   const colorClasses = {
-    blue: "bg-blue-500 dark:bg-blue-600",
-    green: "bg-green-500 dark:bg-green-600",
-    purple: "bg-purple-500 dark:bg-purple-600",
-    orange: "bg-orange-500 dark:bg-orange-600",
-    indigo: "bg-indigo-500 dark:bg-indigo-600",
-    pink: "bg-pink-500 dark:bg-pink-600",
+    blue: "bg-lapis",
+    green: "bg-malachite",
+    purple: "bg-aubergine",
+    orange: "bg-oxblood",
+    indigo: "bg-aqua",
+    pink: "bg-orchid",
   };
 
   return (
@@ -95,26 +95,22 @@ export default function StatsCards({ stats }: StatsCardsProps) {
       {cards.map((card, index) => (
         <div
           key={index}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700"
+          className="bg-[#2A2410] shadow-lg p-6 border border-[#3A3420] backdrop-blur-sm"
         >
           <div className="flex items-center justify-between mb-4">
             <Tooltip content={card.tooltip}>
-              <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <h3 className="text-sm font-medium text-[#B4B0A0]">
                 {card.title}
               </h3>
             </Tooltip>
             <div
-              className={`w-3 h-3 rounded-full ${
+              className={`w-3 h-3 ${
                 colorClasses[card.color as keyof typeof colorClasses]
               }`}
             ></div>
           </div>
-          <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-            {card.value}
-          </div>
-          <div className="text-sm text-gray-500 dark:text-gray-500">
-            {card.subtitle}
-          </div>
+          <div className="text-3xl font-light text-aqua mb-1">{card.value}</div>
+          <div className="text-sm text-[#948F80]">{card.subtitle}</div>
         </div>
       ))}
     </div>

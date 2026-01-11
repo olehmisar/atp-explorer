@@ -1,41 +1,84 @@
-import { ATPStats, ATPType } from '@/types/atp';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { formatTokenAmount } from '@/lib/utils';
+import { formatTokenAmount } from "@/lib/utils";
+import { ATPStats, ATPType } from "@/types/atp";
+import {
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 
 interface TypeDistributionProps {
   stats: ATPStats;
 }
 
-const COLORS = ['#3B82F6', '#10B981', '#F59E0B'];
+// Use brighter, more distinct Aztec brand colors for better contrast
+const COLORS = ["#2BFAE9", "#D4FF28", "#FF2DF4"]; // Aqua, Chartreuse, Orchid
+
+// Custom label renderer for better readability - will be created inside component to access state
 
 export default function TypeDistribution({ stats }: TypeDistributionProps) {
+  // Custom label renderer for better readability
+  const renderCustomLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent,
+  }: any) => {
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="#D4FF28"
+        textAnchor={x > cx ? "start" : "end"}
+        dominantBaseline="central"
+        fontSize={12}
+        fontWeight={600}
+      >
+        {`${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
+
   const data = [
     {
-      name: 'LATP (Linear)',
+      name: "LATP (Linear)",
       value: stats.byType[ATPType.Linear].count,
-      allocation: formatTokenAmount(stats.byType[ATPType.Linear].totalAllocation),
+      allocation: formatTokenAmount(
+        stats.byType[ATPType.Linear].totalAllocation,
+      ),
     },
     {
-      name: 'MATP (Milestone)',
+      name: "MATP (Milestone)",
       value: stats.byType[ATPType.Milestone].count,
-      allocation: formatTokenAmount(stats.byType[ATPType.Milestone].totalAllocation),
+      allocation: formatTokenAmount(
+        stats.byType[ATPType.Milestone].totalAllocation,
+      ),
     },
     {
-      name: 'NCATP (Non-Claim)',
+      name: "NCATP (Non-Claim)",
       value: stats.byType[ATPType.NonClaim].count,
-      allocation: formatTokenAmount(stats.byType[ATPType.NonClaim].totalAllocation),
+      allocation: formatTokenAmount(
+        stats.byType[ATPType.NonClaim].totalAllocation,
+      ),
     },
-  ].filter(item => item.value > 0);
+  ].filter((item) => item.value > 0);
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded shadow-lg">
-          <p className="font-semibold">{payload[0].name}</p>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Count: {payload[0].value}
-          </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+        <div className="bg-[#2A2410] p-3 border border-[#3A3420] shadow-lg">
+          <p className="font-semibold text-aqua">{payload[0].name}</p>
+          <p className="text-sm text-[#B4B0A0]">Count: {payload[0].value}</p>
+          <p className="text-sm text-[#B4B0A0]">
             Allocation: {payload[0].payload.allocation} AZTEC
           </p>
         </div>
@@ -46,20 +89,18 @@ export default function TypeDistribution({ stats }: TypeDistributionProps) {
 
   if (data.length === 0) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+      <div className="bg-[#2A2410]">
+        <h2 className="text-xl font-light text-chartreuse">
           ATP Type Distribution
         </h2>
-        <p className="text-gray-500 dark:text-gray-400 text-center py-8">
-          No ATP data available
-        </p>
+        <p className="text-[#948F80]">No ATP data available</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+    <div className="bg-[#2A2410]">
+      <h2 className="text-xl font-light text-chartreuse">
         ATP Type Distribution
       </h2>
       <ResponsiveContainer width="100%" height={300}>
@@ -69,24 +110,33 @@ export default function TypeDistribution({ stats }: TypeDistributionProps) {
             cx="50%"
             cy="50%"
             labelLine={false}
-            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+            label={renderCustomLabel}
             outerRadius={80}
             fill="#8884d8"
             dataKey="value"
           >
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              <Cell
+                key={`cell-${index}`}
+                fill={COLORS[index % COLORS.length]}
+              />
             ))}
           </Pie>
           <Tooltip content={<CustomTooltip />} />
-          <Legend />
+          <Legend
+            wrapperStyle={{ color: "#D4FF28" }}
+            formatter={(value) => <span className="text-aqua">{value}</span>}
+          />
         </PieChart>
       </ResponsiveContainer>
       <div className="mt-4 space-y-2">
         {data.map((item, index) => (
-          <div key={index} className="flex justify-between items-center text-sm">
-            <span className="text-gray-600 dark:text-gray-400">{item.name}</span>
-            <span className="font-semibold text-gray-900 dark:text-white">
+          <div
+            key={index}
+            className="flex justify-between items-center text-sm"
+          >
+            <span className="text-[#B4B0A0]">{item.name}</span>
+            <span className="font-medium text-aqua">
               {item.value} ATPs ({item.allocation} AZTEC)
             </span>
           </div>

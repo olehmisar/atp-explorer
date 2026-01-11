@@ -1,8 +1,17 @@
-import { ATPData } from "@/types/atp";
 import { generateUnlockPoints } from "@/lib/unlock-calculator";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { formatTokenAmount } from "@/lib/utils";
+import { ATPData } from "@/types/atp";
 import { format } from "date-fns";
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 interface UnlockChartProps {
   atps: ATPData[];
@@ -16,13 +25,9 @@ export default function UnlockChart({ atps }: UnlockChartProps) {
 
   if (locks.length === 0) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-          Unlock Schedule
-        </h2>
-        <p className="text-gray-500 dark:text-gray-400 text-center py-8">
-          No lock data available
-        </p>
+      <div className="bg-[#2A2410]">
+        <h2 className="text-xl font-light text-chartreuse">Unlock Schedule</h2>
+        <p className="text-[#948F80]">No lock data available</p>
       </div>
     );
   }
@@ -59,9 +64,11 @@ export default function UnlockChart({ atps }: UnlockChartProps) {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded shadow-lg">
-          <p className="font-semibold">{format(new Date(data.time), "PPpp")}</p>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+        <div className="bg-[#2A2410]">
+          <p className="font-semibold text-aqua">
+            {format(new Date(data.time), "PPpp")}
+          </p>
+          <p className="text-sm text-[#B4B0A0]">
             Unlocked: {data.unlocked} AZTEC
           </p>
         </div>
@@ -71,19 +78,24 @@ export default function UnlockChart({ atps }: UnlockChartProps) {
   };
 
   // Add vertical line for current time
-  const currentDataPoint = chartData.find((d) => d.time >= now) || chartData[chartData.length - 1];
+  const currentDataPoint =
+    chartData.find((d) => d.time >= now) || chartData[chartData.length - 1];
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+    <div className="bg-[#2A2410] shadow-lg p-6 border border-[#3A3420]">
+      <h2 className="text-xl font-light text-chartreuse mb-4">
         Cumulative Unlock Schedule
       </h2>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+      <p className="text-sm text-[#948F80] mb-4">
         Cumulative AZTEC tokens unlocked over time across all ATPs
       </p>
       <ResponsiveContainer width="100%" height={400}>
         <LineChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" className="stroke-gray-300 dark:stroke-gray-700" />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            className="stroke-[#3A3420]"
+            strokeOpacity={0.3}
+          />
           <XAxis
             dataKey="time"
             type="number"
@@ -91,6 +103,7 @@ export default function UnlockChart({ atps }: UnlockChartProps) {
             domain={[startTime, endTime]}
             tickFormatter={(value) => format(new Date(value), "MMM yyyy")}
             className="text-xs"
+            tick={{ fill: "#D4FF28" }}
           />
           <YAxis
             tickFormatter={(value) => {
@@ -101,13 +114,17 @@ export default function UnlockChart({ atps }: UnlockChartProps) {
               return num.toFixed(2);
             }}
             className="text-xs"
+            tick={{ fill: "#D4FF28" }}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Legend />
+          <Legend
+            wrapperStyle={{ color: "#D4FF28" }}
+            formatter={(value) => <span className="text-aqua">{value}</span>}
+          />
           <Line
             type="monotone"
             dataKey="unlockedRaw"
-            stroke="#3B82F6"
+            stroke="#2BFAE9"
             strokeWidth={2}
             dot={false}
             name="Unlocked AZTEC"
@@ -116,7 +133,7 @@ export default function UnlockChart({ atps }: UnlockChartProps) {
           />
         </LineChart>
       </ResponsiveContainer>
-      <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+      <div className="mt-4 text-sm text-[#948F80]">
         <p>Current time: {format(new Date(now), "PPpp")}</p>
       </div>
     </div>

@@ -61,7 +61,7 @@ function ATPUnlockChart({ atp, size = "small" }: ATPUnlockChartProps) {
 
   if (!atp.globalLock || !chartData) {
     return (
-      <div className={`${containerClass} text-center text-xs text-gray-500 dark:text-gray-400`}>
+      <div className={`${containerClass} text-center text-xs text-[#948F80]`}>
         No lock data
       </div>
     );
@@ -78,13 +78,11 @@ function ATPUnlockChart({ atp, size = "small" }: ATPUnlockChartProps) {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-white dark:bg-gray-800 p-2 border border-gray-200 dark:border-gray-700 rounded shadow-lg text-xs">
-          <p className="font-semibold">
+        <div className="bg-[#2A2410] p-2 border border-[#3A3420] shadow-lg text-xs">
+          <p className="font-semibold text-aqua">
             {format(new Date(data.time), "MMM yyyy")}
           </p>
-          <p className="text-gray-600 dark:text-gray-400">
-            Unlocked: {data.unlocked} AZTEC
-          </p>
+          <p className="text-[#B4B0A0]">Unlocked: {data.unlocked} AZTEC</p>
         </div>
       );
     }
@@ -94,13 +92,10 @@ function ATPUnlockChart({ atp, size = "small" }: ATPUnlockChartProps) {
   return (
     <div className={containerClass}>
       <ResponsiveContainer width="100%" height={height}>
-        <LineChart
-          data={chartData}
-          margin={margin}
-        >
+        <LineChart data={chartData} margin={margin}>
           <CartesianGrid
             strokeDasharray="3 3"
-            className="stroke-gray-300 dark:stroke-gray-700"
+            className="stroke-[#3A3420]"
             strokeOpacity={0.3}
           />
           <XAxis
@@ -112,6 +107,7 @@ function ATPUnlockChart({ atp, size = "small" }: ATPUnlockChartProps) {
             className="text-xs"
             height={30}
             tickCount={4}
+            tick={{ fill: "#D4FF28" }}
           />
           <YAxis
             tickFormatter={(value) => {
@@ -124,12 +120,13 @@ function ATPUnlockChart({ atp, size = "small" }: ATPUnlockChartProps) {
             className="text-xs"
             width={60}
             tickCount={4}
+            tick={{ fill: "#D4FF28" }}
           />
           <Tooltip content={<CustomTooltip />} />
           <Line
             type="monotone"
             dataKey="unlockedRaw"
-            stroke="#3B82F6"
+            stroke="#2BFAE9"
             strokeWidth={1.5}
             dot={false}
             name="Unlocked AZTEC"

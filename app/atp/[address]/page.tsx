@@ -12,13 +12,13 @@ import { useParams } from "next/navigation";
 function getTypeBadgeColor(type: ATPType): string {
   switch (type) {
     case ATPType.Linear:
-      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+      return "bg-lapis/30 text-lapis";
     case ATPType.Milestone:
-      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      return "bg-malachite/30 text-malachite";
     case ATPType.NonClaim:
-      return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
+      return "bg-aubergine/30 text-aqua";
     default:
-      return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+      return "bg-[#3A3420] text-[#B4B0A0]";
   }
 }
 
@@ -47,14 +47,12 @@ export default function ATPDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen bg-lapis">
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-96">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600 dark:text-gray-400">
-                Loading ATP data...
-              </p>
+              <div className="animate-spin h-12 w-12 border-2 border-aqua border-t-transparent mx-auto"></div>
+              <p className="mt-4 text-[#B4B0A0]">Loading ATP data...</p>
             </div>
           </div>
         </div>
@@ -64,18 +62,16 @@ export default function ATPDetailPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen bg-lapis">
         <div className="container mx-auto px-4 py-8">
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-            <h2 className="text-red-800 dark:text-red-200 font-semibold mb-2">
-              Error
-            </h2>
-            <p className="text-red-600 dark:text-red-300">
+          <div className="bg-[#3A1A1A]">
+            <h2 className="text-[#FF6B6B]">Error</h2>
+            <p className="text-[#FF8A8A]">
               {error instanceof Error ? error.message : "Failed to load data"}
             </p>
             <Link
               href="/"
-              className="mt-4 inline-block px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              className="mt-4 inline-block px-4 py-2 bg-vermillion text-lapis rounded hover:bg-red-700"
             >
               Back to Dashboard
             </Link>
@@ -87,18 +83,16 @@ export default function ATPDetailPage() {
 
   if (!atpWithSchedule) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen bg-lapis">
         <div className="container mx-auto px-4 py-8">
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-            <h2 className="text-yellow-800 dark:text-yellow-200 font-semibold mb-2">
-              ATP Not Found
-            </h2>
-            <p className="text-yellow-600 dark:text-yellow-300">
+          <div className="bg-[#3A2A1A]">
+            <h2 className="text-aqua">ATP Not Found</h2>
+            <p className="text-aqua">
               No ATP found with address: {formatAddress(address)}
             </p>
             <Link
               href="/"
-              className="mt-4 inline-block px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+              className="mt-4 inline-block px-4 py-2 bg-chartreuse text-lapis rounded hover:bg-yellow-700"
             >
               Back to Dashboard
             </Link>
@@ -109,55 +103,50 @@ export default function ATPDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-lapis to-[#001A3A]">
       <div className="container mx-auto px-4 py-8">
         <header className="mb-8">
-          <Link
-            href="/"
-            className="text-blue-600 dark:text-blue-400 hover:underline mb-4 inline-block"
-          >
+          <Link href="/" className="text-chartreuse hover:underline">
             ← Back to Dashboard
           </Link>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            ATP Details
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+          <h1 className="text-4xl font-light text-chartreuse">ATP Details</h1>
+          <p className="text-sm text-[#948F80]">
             Address: <span className="font-mono">{formatAddress(address)}</span>
           </p>
         </header>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+        <div className="bg-[#2A2410] shadow-lg p-6 border border-[#3A3420]">
           {/* Type & Status */}
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+            <h2 className="text-lg font-light text-chartreuse mb-3">
               Type & Status
             </h2>
             <div className="flex flex-wrap gap-2">
               <span
-                className={`px-3 py-1.5 text-sm font-semibold rounded-full ${getTypeBadgeColor(
+                className={`inline-flex px-3 py-1.5 text-sm font-semibold w-auto ${getTypeBadgeColor(
                   atpWithSchedule.type,
                 )}`}
               >
                 {atpWithSchedule.type}
               </span>
               {atpWithSchedule.isRevoked && (
-                <span className="px-3 py-1.5 text-sm font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                <span className="inline-flex px-3 py-1.5 text-sm font-semibold bg-vermillion/30 text-[#FF6B6B] w-auto">
                   Revoked
                 </span>
               )}
               {atpWithSchedule.isRevokable && !atpWithSchedule.isRevoked && (
-                <span className="px-3 py-1.5 text-sm font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                <span className="inline-flex px-3 py-1.5 text-sm font-semibold bg-aqua/30 text-aqua w-auto">
                   Revokable
                 </span>
               )}
               {atpWithSchedule.milestoneStatus && (
                 <span
-                  className={`px-3 py-1.5 text-sm font-semibold rounded-full ${
+                  className={`inline-flex px-3 py-1.5 text-sm font-semibold w-auto ${
                     atpWithSchedule.milestoneStatus === "Succeeded"
-                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                      ? "bg-malachite/30 text-aqua"
                       : atpWithSchedule.milestoneStatus === "Failed"
-                      ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                      : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+                      ? "bg-vermillion/30 text-[#FF6B6B]"
+                      : "bg-[#3A3420] text-[#B4B0A0]"
                   }`}
                 >
                   {atpWithSchedule.milestoneStatus}
@@ -168,46 +157,38 @@ export default function ATPDetailPage() {
 
           {/* Addresses */}
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-              Addresses
-            </h2>
+            <h2 className="text-lg font-light text-chartreuse">Addresses</h2>
             <div className="space-y-2">
               <div>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  ATP Contract:
-                </span>
+                <span className="text-sm text-[#B4B0A0]">ATP Contract:</span>
                 <a
                   href={`https://etherscan.io/address/${atpWithSchedule.address}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="ml-2 text-blue-600 dark:text-blue-400 hover:underline font-mono"
+                  className="ml-2 text-chartreuse hover:underline"
                 >
                   {formatAddress(atpWithSchedule.address)}
                 </a>
               </div>
               <div>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Beneficiary:
-                </span>
+                <span className="text-sm text-[#B4B0A0]">Beneficiary:</span>
                 <a
                   href={`https://etherscan.io/address/${atpWithSchedule.beneficiary}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="ml-2 text-blue-600 dark:text-blue-400 hover:underline font-mono"
+                  className="ml-2 text-chartreuse hover:underline"
                 >
                   {formatAddress(atpWithSchedule.beneficiary)}
                 </a>
               </div>
               {atpWithSchedule.operator && (
                 <div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    Operator:
-                  </span>
+                  <span className="text-sm text-[#B4B0A0]">Operator:</span>
                   <a
                     href={`https://etherscan.io/address/${atpWithSchedule.operator}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="ml-2 text-blue-600 dark:text-blue-400 hover:underline font-mono"
+                    className="ml-2 text-chartreuse hover:underline"
                   >
                     {formatAddress(atpWithSchedule.operator)}
                   </a>
@@ -215,14 +196,12 @@ export default function ATPDetailPage() {
               )}
               {atpWithSchedule.staker && (
                 <div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    Staker:
-                  </span>
+                  <span className="text-sm text-[#B4B0A0]">Staker:</span>
                   <a
                     href={`https://etherscan.io/address/${atpWithSchedule.staker}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="ml-2 text-blue-600 dark:text-blue-400 hover:underline font-mono"
+                    className="ml-2 text-chartreuse hover:underline"
                   >
                     {formatAddress(atpWithSchedule.staker)}
                   </a>
@@ -233,39 +212,31 @@ export default function ATPDetailPage() {
 
           {/* Token Amounts */}
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+            <h2 className="text-lg font-light text-chartreuse">
               Token Amounts
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Allocation
-                </div>
-                <div className="text-xl font-semibold text-gray-900 dark:text-white">
+                <div className="text-sm text-[#B4B0A0]">Allocation</div>
+                <div className="text-xl font-semibold text-aqua">
                   {formatTokenAmount(atpWithSchedule.allocation)}
                 </div>
               </div>
               <div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Claimed
-                </div>
-                <div className="text-xl font-semibold text-gray-900 dark:text-white">
+                <div className="text-sm text-[#B4B0A0]">Claimed</div>
+                <div className="text-xl font-semibold text-aqua">
                   {formatTokenAmount(atpWithSchedule.claimed)}
                 </div>
               </div>
               <div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Claimable
-                </div>
-                <div className="text-xl font-semibold text-green-600 dark:text-green-400">
+                <div className="text-sm text-[#B4B0A0]">Claimable</div>
+                <div className="text-xl font-semibold text-aqua">
                   {formatTokenAmount(atpWithSchedule.claimable)}
                 </div>
               </div>
               <div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Balance
-                </div>
-                <div className="text-xl font-semibold text-gray-900 dark:text-white">
+                <div className="text-sm text-[#B4B0A0]">Balance</div>
+                <div className="text-xl font-semibold text-aqua">
                   {formatTokenAmount(atpWithSchedule.balance)}
                 </div>
               </div>
@@ -275,28 +246,24 @@ export default function ATPDetailPage() {
           {/* Unlock Schedule */}
           {atpWithSchedule.unlockSchedule && (
             <div className="mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+              <h2 className="text-lg font-light text-chartreuse">
                 Unlock Schedule
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Unlocked
-                  </div>
-                  <div className="text-xl font-semibold text-gray-900 dark:text-white">
+                  <div className="text-sm text-[#B4B0A0]">Unlocked</div>
+                  <div className="text-xl font-semibold text-aqua">
                     {formatTokenAmount(
                       atpWithSchedule.unlockSchedule.currentUnlocked,
                     )}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <div className="text-xs text-[#948F80]">
                     of {formatTokenAmount(atpWithSchedule.allocation)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Progress
-                  </div>
-                  <div className="text-xl font-semibold text-gray-900 dark:text-white">
+                  <div className="text-sm text-[#B4B0A0]">Progress</div>
+                  <div className="text-xl font-semibold text-aqua">
                     {atpWithSchedule.unlockSchedule.fullyUnlocked
                       ? "100%"
                       : (
@@ -307,17 +274,15 @@ export default function ATPDetailPage() {
                           100
                         ).toFixed(1) + "%"}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <div className="text-xs text-[#948F80]">
                     {atpWithSchedule.unlockSchedule.fullyUnlocked
                       ? "Fully Unlocked"
                       : "In Progress"}
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Cliff End
-                  </div>
-                  <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <div className="text-sm text-[#B4B0A0]">Cliff End</div>
+                  <div className="text-lg font-semibold text-aqua">
                     {format(
                       new Date(
                         Math.floor(atpWithSchedule.unlockSchedule.cliffEnd),
@@ -327,10 +292,8 @@ export default function ATPDetailPage() {
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Full Unlock
-                  </div>
-                  <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <div className="text-sm text-[#B4B0A0]">Full Unlock</div>
+                  <div className="text-lg font-semibold text-aqua">
                     {format(
                       new Date(
                         Math.floor(atpWithSchedule.unlockSchedule.fullUnlock),
@@ -346,15 +309,13 @@ export default function ATPDetailPage() {
           {/* Lock Details */}
           {atpWithSchedule.globalLock && (
             <div className="mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+              <h2 className="text-lg font-light text-chartreuse">
                 Global Lock Details
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Start Time
-                  </div>
-                  <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                  <div className="text-sm text-[#B4B0A0]">Start Time</div>
+                  <div className="text-sm font-semibold text-aqua">
                     {format(
                       new Date(
                         Math.floor(atpWithSchedule.globalLock.startTime),
@@ -364,10 +325,8 @@ export default function ATPDetailPage() {
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Cliff Duration
-                  </div>
-                  <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                  <div className="text-sm text-[#B4B0A0]">Cliff Duration</div>
+                  <div className="text-sm font-semibold text-aqua">
                     {Math.floor(
                       atpWithSchedule.globalLock.cliffDuration /
                         (1000 * 60 * 60 * 24),
@@ -376,10 +335,8 @@ export default function ATPDetailPage() {
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Lock Duration
-                  </div>
-                  <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                  <div className="text-sm text-[#B4B0A0]">Lock Duration</div>
+                  <div className="text-sm font-semibold text-aqua">
                     {Math.floor(
                       atpWithSchedule.globalLock.lockDuration /
                         (1000 * 60 * 60 * 24),
@@ -388,10 +345,8 @@ export default function ATPDetailPage() {
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Lock Amount
-                  </div>
-                  <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                  <div className="text-sm text-[#B4B0A0]">Lock Amount</div>
+                  <div className="text-sm font-semibold text-aqua">
                     {formatTokenAmount(atpWithSchedule.globalLock.amount)}
                   </div>
                 </div>
@@ -402,14 +357,12 @@ export default function ATPDetailPage() {
           {/* Milestone Info */}
           {atpWithSchedule.milestoneId && (
             <div className="mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+              <h2 className="text-lg font-light text-chartreuse">
                 Milestone Information
               </h2>
               <div>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Milestone ID:
-                </span>
-                <span className="ml-2 font-mono text-gray-900 dark:text-white">
+                <span className="text-sm text-[#B4B0A0]">Milestone ID:</span>
+                <span className="ml-2 font-mono text-aqua">
                   {atpWithSchedule.milestoneId}
                 </span>
               </div>
@@ -419,7 +372,7 @@ export default function ATPDetailPage() {
           {/* Unlock Chart */}
           {atpWithSchedule.globalLock && (
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              <h2 className="text-xl font-semibold text-chartreuse">
                 Unlock Chart
               </h2>
               <div className="flex justify-center">

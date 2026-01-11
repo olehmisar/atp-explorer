@@ -3,8 +3,8 @@
 import { formatAddress, formatTokenAmount } from "@/lib/utils";
 import { ATPData, ATPType } from "@/types/atp";
 import { format } from "date-fns";
-import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import ATPUnlockChart from "./ATPUnlockChart";
 
 // Simple tooltip component with icon
@@ -44,13 +44,13 @@ const PAGE_SIZE_OPTIONS = [50, 100, 250, 500, 1000];
 function getTypeBadgeColor(type: ATPType): string {
   switch (type) {
     case ATPType.Linear:
-      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+      return "bg-lapis/30 text-aqua";
     case ATPType.Milestone:
-      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      return "bg-malachite/30 text-aqua";
     case ATPType.NonClaim:
-      return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
+      return "bg-aubergine/30 text-aqua";
     default:
-      return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+      return "bg-[#3A3420] text-[#B4B0A0]";
   }
 }
 
@@ -61,6 +61,7 @@ export default function ATPTable({ atps }: ATPTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
   const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const [showPageSizeDropdown, setShowPageSizeDropdown] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState<Set<ATPType>>(new Set());
   const [selectedRevokable, setSelectedRevokable] = useState<
     "revokable" | "non-revokable" | null
@@ -221,11 +222,9 @@ export default function ATPTable({ atps }: ATPTableProps) {
 
   if (atps.length === 0) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-          ATP Positions
-        </h2>
-        <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+      <div className="bg-[#2A2410]">
+        <h2 className="text-xl font-light text-chartreuse">ATP Positions</h2>
+        <p className="text-[#948F80]">
           No ATP positions found. Connect to the blockchain to fetch ATP data.
         </p>
       </div>
@@ -249,36 +248,85 @@ export default function ATPTable({ atps }: ATPTableProps) {
         } gap-4`}
       >
         {showCount && (
-          <div
-            className={`${
-              compact ? "text-xs" : "text-sm"
-            } text-gray-700 dark:text-gray-300`}
-          >
+          <div className={`${compact ? "text-xs" : "text-sm"} text-[#B4B0A0]`}>
             {startIndex + 1} to {Math.min(endIndex, sortedATPs.length)} of{" "}
             {sortedATPs.length}
           </div>
         )}
         <div className="flex items-center gap-4">
-          <label
-            className={`${
-              compact ? "text-xs" : "text-sm"
-            } text-gray-700 dark:text-gray-300 flex items-center gap-2`}
-          >
-            <span>Per page:</span>
-            <select
-              value={pageSize}
-              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+          <div className="relative">
+            <label
               className={`${
-                compact ? "px-2 py-1 text-xs" : "px-3 py-1 text-sm"
-              } border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                compact ? "text-xs" : "text-sm"
+              } text-[#B4B0A0] flex items-center gap-2`}
             >
-              {PAGE_SIZE_OPTIONS.map((size) => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-            </select>
-          </label>
+              <span>Per page:</span>
+              <button
+                type="button"
+                onClick={() => setShowPageSizeDropdown(!showPageSizeDropdown)}
+                className={`${
+                  compact ? "px-2 py-1 text-xs" : "px-3 py-1 text-sm"
+                } border border-[#3A3420] bg-[#2A2410] text-chartreuse focus:outline-none focus:ring-2 focus:ring-chartreuse flex items-center gap-2 min-w-[80px] justify-between`}
+              >
+                <span>{pageSize}</span>
+                <svg
+                  className={`w-4 h-4 transition-transform ${
+                    showPageSizeDropdown ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+            </label>
+            {showPageSizeDropdown && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={() => setShowPageSizeDropdown(false)}
+                />
+                <div className="absolute top-full left-0 mt-1 z-20 bg-[#2A2410] border border-[#3A3420] shadow-lg min-w-[80px]">
+                  {PAGE_SIZE_OPTIONS.map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => {
+                        handlePageSizeChange(size);
+                        setShowPageSizeDropdown(false);
+                      }}
+                      className={`w-full px-3 py-2 text-sm text-left ${
+                        pageSize === size
+                          ? "bg-lapis/30 text-aqua"
+                          : "text-[#B4B0A0] hover:bg-[#3A3420]"
+                      } transition-colors flex items-center justify-between`}
+                    >
+                      <span>{size}</span>
+                      {pageSize === size && (
+                        <svg
+                          className="w-4 h-4"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
           <PaginationControls compact={compact} />
         </div>
       </div>
@@ -293,15 +341,11 @@ export default function ATPTable({ atps }: ATPTableProps) {
         disabled={currentPage === 1}
         className={`${
           compact ? "px-2 py-1 text-xs" : "px-3 py-1 text-sm"
-        } border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600`}
+        } border border-[#3A3420] bg-[#2A2410] text-chartreuse disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#3A3420] transition-colors`}
       >
         Previous
       </button>
-      <span
-        className={`${
-          compact ? "text-xs" : "text-sm"
-        } text-gray-700 dark:text-gray-300`}
-      >
+      <span className={`${compact ? "text-xs" : "text-sm"} text-[#B4B0A0]`}>
         Page {currentPage} of {totalPages}
       </span>
       <button
@@ -309,7 +353,7 @@ export default function ATPTable({ atps }: ATPTableProps) {
         disabled={currentPage === totalPages}
         className={`${
           compact ? "px-2 py-1 text-xs" : "px-3 py-1 text-sm"
-        } border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600`}
+        } border border-[#3A3420] bg-[#2A2410] text-chartreuse disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#3A3420] transition-colors`}
       >
         Next
       </button>
@@ -317,15 +361,15 @@ export default function ATPTable({ atps }: ATPTableProps) {
   );
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-      <div className="sticky top-0 z-20 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+    <div className="bg-[#2A2410]">
+      <div className="sticky top-0 z-20 bg-[#2A2410]">
         <div className="px-6 py-3">
           <div className="flex items-center justify-between mb-2">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h2 className="text-lg font-light text-chartreuse">
                 ATP Positions
               </h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-[#948F80]">
                 {sortedATPs.length} of {atps.length} position
                 {atps.length !== 1 ? "s" : ""} shown
               </p>
@@ -339,15 +383,13 @@ export default function ATPTable({ atps }: ATPTableProps) {
                   e.stopPropagation();
                   setShowFilterPanel((prev) => !prev);
                 }}
-                className={`px-4 py-2 text-sm font-medium rounded-md border transition-colors ${
-                  hasActiveFilters
-                    ? "bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300"
-                    : "bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
-                } ${showFilterPanel ? "ring-2 ring-blue-500" : ""}`}
+                className={`px-4 py-2 text-sm font-medium border transition-colors text-chartreuse ${
+                  hasActiveFilters ? "bg-lapis/30" : "bg-[#2A2410]"
+                } ${showFilterPanel ? "ring-2 ring-chartreuse" : ""}`}
               >
                 Filter
                 {hasActiveFilters && (
-                  <span className="ml-2 px-1.5 py-0.5 text-xs bg-blue-600 text-white rounded-full">
+                  <span className="ml-2 px-1.5 py-0.5 text-xs bg-aqua/30 text-aqua ">
                     {selectedTypes.size +
                       (selectedRevokable ? 1 : 0) +
                       (minAllocation !== "" ? 1 : 0) +
@@ -363,22 +405,20 @@ export default function ATPTable({ atps }: ATPTableProps) {
       </div>
       {/* Filter Panel - Moved here to ensure visibility */}
       <div
-        className={`w-full border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 ${
+        className={`w-full border-t border-[#3A3420] bg-[#3A3420]/50 ${
           showFilterPanel ? "" : "hidden"
         }`}
       >
         <div className="px-6 py-4">
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                Filters
-              </h3>
+              <h3 className="text-sm font-medium text-chartreuse">Filters</h3>
               <div className="flex items-center gap-3">
                 {hasActiveFilters && (
                   <button
                     type="button"
                     onClick={clearFilters}
-                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-xs text-chartreuse hover:underline"
                   >
                     Clear all
                   </button>
@@ -386,7 +426,7 @@ export default function ATPTable({ atps }: ATPTableProps) {
                 <button
                   type="button"
                   onClick={() => setShowFilterPanel(false)}
-                  className="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                  className="text-xs text-chartreuse hover:underline"
                 >
                   ✕ Close
                 </button>
@@ -395,7 +435,7 @@ export default function ATPTable({ atps }: ATPTableProps) {
             <div className="flex flex-col gap-3">
               {/* Type filters */}
               <div>
-                <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                <label className="text-xs font-medium text-[#B4B0A0]">
                   Type (select multiple)
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -404,10 +444,8 @@ export default function ATPTable({ atps }: ATPTableProps) {
                       key={type}
                       type="button"
                       onClick={() => toggleTypeFilter(type)}
-                      className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-colors ${
-                        selectedTypes.has(type)
-                          ? "bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300"
-                          : "bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+                      className={`px-3 py-1.5 text-xs font-medium border transition-colors text-chartreuse ${
+                        selectedTypes.has(type) ? "bg-lapis/30" : "bg-[#2A2410]"
                       }`}
                     >
                       {type}
@@ -417,17 +455,17 @@ export default function ATPTable({ atps }: ATPTableProps) {
               </div>
               {/* Revokable filters */}
               <div>
-                <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                <label className="text-xs font-medium text-[#B4B0A0]">
                   Revokable Status (select one)
                 </label>
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={() => handleRevokableFilterChange("revokable")}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-colors ${
+                    className={`px-3 py-1.5 text-xs font-medium border transition-colors text-chartreuse ${
                       selectedRevokable === "revokable"
-                        ? "bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300"
-                        : "bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+                        ? "bg-lapis/30"
+                        : "bg-[#2A2410]"
                     }`}
                   >
                     Revokable
@@ -435,10 +473,10 @@ export default function ATPTable({ atps }: ATPTableProps) {
                   <button
                     type="button"
                     onClick={() => handleRevokableFilterChange("non-revokable")}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-colors ${
+                    className={`px-3 py-1.5 text-xs font-medium border transition-colors text-chartreuse ${
                       selectedRevokable === "non-revokable"
-                        ? "bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300"
-                        : "bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+                        ? "bg-lapis/30"
+                        : "bg-[#2A2410]"
                     }`}
                   >
                     Non-Revokable
@@ -447,7 +485,7 @@ export default function ATPTable({ atps }: ATPTableProps) {
               </div>
               {/* Allocation filters */}
               <div>
-                <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                <label className="text-xs font-medium text-[#B4B0A0]">
                   Allocation Range
                 </label>
                 <div className="flex items-center gap-2">
@@ -456,20 +494,18 @@ export default function ATPTable({ atps }: ATPTableProps) {
                     placeholder="Min"
                     value={minAllocation}
                     onChange={(e) => handleMinAllocationChange(e.target.value)}
-                    className="px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-32"
+                    className="px-3 py-1.5 text-xs border border-[#3A3420]"
                   />
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    to
-                  </span>
+                  <span className="text-xs text-[#948F80]">to</span>
                   <input
                     type="text"
                     placeholder="Max"
                     value={maxAllocation}
                     onChange={(e) => handleMaxAllocationChange(e.target.value)}
-                    className="px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-32"
+                    className="px-3 py-1.5 text-xs border border-[#3A3420]"
                   />
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-xs text-[#948F80]">
                   Enter values in AZTEC tokens (18 decimals, e.g., 1 for 1
                   token)
                 </p>
@@ -480,11 +516,11 @@ export default function ATPTable({ atps }: ATPTableProps) {
       </div>
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50 dark:bg-gray-700/50">
+          <thead className="bg-[#3A3420]">
             <tr>
               <th
                 style={{ position: "sticky", top: 0 }}
-                className="z-10 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-700/50"
+                className="z-10 px-6 py-3 text-left text-xs font-medium text-[#948F80]"
               >
                 <Tooltip content="ATP contract address and beneficiary address">
                   Addresses
@@ -492,7 +528,7 @@ export default function ATPTable({ atps }: ATPTableProps) {
               </th>
               <th
                 style={{ position: "sticky", top: 0 }}
-                className="z-10 px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-700/50 w-32"
+                className="z-10 px-3 py-3 text-left text-xs font-medium text-[#948F80]"
               >
                 <Tooltip content="ATP type: Linear (LATP), Milestone (MATP), or Non-Claim (NCATP). Status: Revoked, Revokable, or Milestone status (Pending/Succeeded/Failed)">
                   Type
@@ -500,17 +536,17 @@ export default function ATPTable({ atps }: ATPTableProps) {
               </th>
               <th
                 style={{ position: "sticky", top: 0 }}
-                className="z-10 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-700/50"
+                className="z-10 px-6 py-3 text-left text-xs font-medium text-[#948F80]"
               >
                 <button
                   onClick={() => handleSort("allocation")}
-                  className="flex items-center gap-1 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                  className="flex items-center gap-1 hover:text-chartreuse"
                 >
                   <Tooltip content="Allocation: Total tokens allocated. Claimed: Already claimed tokens. Claimable: Currently claimable tokens. Balance: Current contract balance">
                     AMOUNT
                   </Tooltip>
                   {sortColumn === "allocation" && (
-                    <span className="text-gray-400 dark:text-gray-500">
+                    <span className="text-[#8A8470]">
                       {sortDirection === "asc" ? "↑" : "↓"}
                     </span>
                   )}
@@ -518,7 +554,7 @@ export default function ATPTable({ atps }: ATPTableProps) {
               </th>
               <th
                 style={{ position: "sticky", top: 0 }}
-                className="z-10 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-700/50"
+                className="z-10 px-6 py-3 text-left text-xs font-medium text-[#948F80]"
               >
                 <Tooltip content="Unlock status: Current unlocked amount, progress percentage, and full unlock date">
                   Unlock
@@ -526,7 +562,7 @@ export default function ATPTable({ atps }: ATPTableProps) {
               </th>
               <th
                 style={{ position: "sticky", top: 0 }}
-                className="z-10 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-64 bg-gray-50 dark:bg-gray-700/50"
+                className="z-10 px-6 py-3 text-left text-xs font-medium text-[#948F80]"
               >
                 <Tooltip content="Visual chart showing the unlock schedule over time">
                   Chart
@@ -534,52 +570,47 @@ export default function ATPTable({ atps }: ATPTableProps) {
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="bg-[#2A2410]">
             {paginatedATPs.length === 0 ? (
               <tr>
                 <td
                   colSpan={5}
-                  className="px-6 py-8 text-center text-gray-500 dark:text-gray-400"
+                  className="px-6 py-8 text-center text-[#948F80]"
                 >
                   No ATP positions match the selected filters.
                 </td>
               </tr>
             ) : (
               paginatedATPs.map((atp) => (
-                <tr
-                  key={atp.address}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                >
+                <tr key={atp.address} className="hover:bg-[#3A3420]">
                   <td className="px-6 py-4 text-sm">
                     <div className="flex flex-col space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          ATP:
-                        </span>
+                        <span className="text-xs text-[#948F80]">ATP:</span>
                         <a
                           href={`https://etherscan.io/address/${atp.address}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-blue-400 hover:underline"
+                          className="text-chartreuse hover:underline"
                         >
                           {formatAddress(atp.address)}
                         </a>
                         <Link
                           href={`/atp/${atp.address}`}
-                          className="ml-2 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                          className="ml-2 text-xs text-chartreuse hover:underline"
                         >
                           View Details →
                         </Link>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="text-xs text-[#948F80]">
                           Beneficiary:
                         </span>
                         <a
                           href={`https://etherscan.io/address/${atp.beneficiary}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-blue-400 hover:underline"
+                          className="text-chartreuse hover:underline"
                         >
                           {formatAddress(atp.beneficiary)}
                         </a>
@@ -589,7 +620,7 @@ export default function ATPTable({ atps }: ATPTableProps) {
                   <td className="px-3 py-4 text-sm w-32">
                     <div className="flex flex-col space-y-1">
                       <span
-                        className={`px-1.5 py-0.5 text-xs font-semibold rounded-full w-fit ${getTypeBadgeColor(
+                        className={`inline-flex px-2 py-1 text-xs font-semibold w-auto ${getTypeBadgeColor(
                           atp.type,
                         )}`}
                       >
@@ -597,23 +628,23 @@ export default function ATPTable({ atps }: ATPTableProps) {
                       </span>
                       <div className="flex flex-col space-y-1">
                         {atp.isRevoked && (
-                          <span className="px-1.5 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 w-fit">
+                          <span className="inline-flex px-2 py-1 text-xs font-semibold bg-vermillion/30 text-[#FF6B6B] w-auto">
                             Revoked
                           </span>
                         )}
                         {atp.isRevokable && !atp.isRevoked && (
-                          <span className="px-1.5 py-0.5 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 w-fit">
+                          <span className="inline-flex px-2 py-1 text-xs font-semibold bg-aqua/30 text-aqua w-auto">
                             Revokable
                           </span>
                         )}
                         {atp.milestoneStatus && (
                           <span
-                            className={`px-1.5 py-0.5 text-xs font-semibold rounded-full w-fit ${
+                            className={`inline-flex px-2 py-1 text-xs font-semibold w-auto ${
                               atp.milestoneStatus === "Succeeded"
-                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                ? "bg-malachite/30 text-aqua"
                                 : atp.milestoneStatus === "Failed"
-                                ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                                : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+                                ? "bg-vermillion/30 text-[#FF6B6B]"
+                                : "bg-[#3A3420] text-[#B4B0A0]"
                             }`}
                           >
                             {atp.milestoneStatus}
@@ -622,44 +653,44 @@ export default function ATPTable({ atps }: ATPTableProps) {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                  <td className="px-6 py-4 text-sm text-aqua">
                     <div className="flex flex-col space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          Alloc:
+                        <span className="text-xs text-[#948F80]">Alloc:</span>
+                        <span className="text-aqua">
+                          {formatTokenAmount(atp.allocation)}
                         </span>
-                        <span>{formatTokenAmount(atp.allocation)}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          Claimed:
+                        <span className="text-xs text-[#948F80]">Claimed:</span>
+                        <span className="text-aqua">
+                          {formatTokenAmount(atp.claimed)}
                         </span>
-                        <span>{formatTokenAmount(atp.claimed)}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="text-xs text-[#948F80]">
                           Claimable:
                         </span>
-                        <span className="text-green-600 dark:text-green-400">
+                        <span className="text-aqua">
                           {formatTokenAmount(atp.claimable)}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          Balance:
+                        <span className="text-xs text-[#948F80]">Balance:</span>
+                        <span className="text-aqua">
+                          {formatTokenAmount(atp.balance)}
                         </span>
-                        <span>{formatTokenAmount(atp.balance)}</span>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                  <td className="px-6 py-4 text-sm text-aqua">
                     {atp.unlockSchedule ? (
                       <div className="flex flex-col space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                          <span className="text-xs text-[#948F80]">
                             Unlocked:
                           </span>
-                          <span>
+                          <span className="text-aqua">
                             {formatTokenAmount(
                               atp.unlockSchedule.currentUnlocked,
                             )}{" "}
@@ -667,15 +698,15 @@ export default function ATPTable({ atps }: ATPTableProps) {
                           </span>
                         </div>
                         {atp.unlockSchedule.fullyUnlocked ? (
-                          <span className="text-xs text-green-600 dark:text-green-400">
+                          <span className="text-xs text-aqua">
                             Fully Unlocked
                           </span>
                         ) : (
                           <div className="flex items-center gap-2">
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                            <span className="text-xs text-[#948F80]">
                               Progress:
                             </span>
-                            <span className="text-xs">
+                            <span className="text-xs text-aqua">
                               {(
                                 (Number(atp.unlockSchedule.currentUnlocked) /
                                   Number(atp.allocation)) *
@@ -686,10 +717,10 @@ export default function ATPTable({ atps }: ATPTableProps) {
                           </div>
                         )}
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                          <span className="text-xs text-[#948F80]">
                             Full unlock:
                           </span>
-                          <span className="text-xs">
+                          <span className="text-xs text-aqua">
                             {format(
                               new Date(
                                 Math.floor(atp.unlockSchedule.fullUnlock),
@@ -714,7 +745,7 @@ export default function ATPTable({ atps }: ATPTableProps) {
       </div>
       {/* Navigation at bottom */}
       {totalPages > 1 && (
-        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="px-6 py-4 border-t border-gray-200">
           <TableNavigation showCount />
         </div>
       )}
