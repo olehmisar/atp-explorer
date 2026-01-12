@@ -41,7 +41,7 @@ export default function TypeDistribution({ stats }: TypeDistributionProps) {
         textAnchor={x > cx ? "start" : "end"}
         dominantBaseline="central"
         fontSize={14}
-        fontWeight={700}
+        fontWeight={400}
         stroke="#1A1400"
         strokeWidth={2}
       >
