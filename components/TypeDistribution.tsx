@@ -37,11 +37,13 @@ export default function TypeDistribution({ stats }: TypeDistributionProps) {
       <text
         x={x}
         y={y}
-        fill="#D4FF28"
+        fill="#FFFFFF"
         textAnchor={x > cx ? "start" : "end"}
         dominantBaseline="central"
-        fontSize={12}
-        fontWeight={600}
+        fontSize={14}
+        fontWeight={700}
+        stroke="#1A1400"
+        strokeWidth={2}
       >
         {`${(percent * 100).toFixed(0)}%`}
       </text>
