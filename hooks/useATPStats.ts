@@ -1,7 +1,7 @@
-import { ATPDashboardData } from "@/types/atp";
+import { ATPExplorerData } from "@/types/atp";
 import { useQuery } from "@tanstack/react-query";
 
-async function fetchATPStats(): Promise<ATPDashboardData> {
+async function fetchATPStats(): Promise<ATPExplorerData> {
   const response = await fetch("/api/stats");
   if (!response.ok) {
     throw new Error("Failed to fetch data");

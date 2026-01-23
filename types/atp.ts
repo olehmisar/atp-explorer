@@ -66,7 +66,7 @@ export interface ATPStats {
   };
 }
 
-export interface ATPDashboardData {
+export interface ATPExplorerData {
   stats: ATPStats;
   atps: ATPData[];
   lastUpdated: number; // Unix timestamp in milliseconds

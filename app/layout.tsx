@@ -4,8 +4,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ATP Dashboard - Aztec Token Position Stats",
-  description: "Dashboard showing statistics for Aztec Token Positions (ATPs)",
+  title: "ATP Explorer - Aztec Token Position Stats",
+  description: "Explorer showing statistics for Aztec Token Positions (ATPs)",
 };
 
 export default function RootLayout({

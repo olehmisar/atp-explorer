@@ -1,6 +1,6 @@
-# ATP Dashboard
+# ATP Explorer
 
-A dashboard for visualizing Aztec Token Position (ATP) statistics on Ethereum mainnet.
+An explorer for visualizing Aztec Token Position (ATP) statistics on Ethereum mainnet.
 
 ## Features
 
@@ -45,13 +45,13 @@ A dashboard for visualizing Aztec Token Position (ATP) statistics on Ethereum ma
 ## Project Structure
 
 ```
-atp-dashboard/
+atp-explorer/
 ├── app/
 │   ├── api/
 │   │   ├── stats/route.ts      # API endpoint for ATP statistics
 │   │   └── atps/route.ts       # API endpoint for ATP data
 │   ├── layout.tsx              # Root layout
-│   ├── page.tsx                # Main dashboard page
+│   ├── page.tsx                # Main explorer page
 │   └── globals.css             # Global styles
 ├── components/
 │   ├── ATPTable.tsx            # Table component for ATP positions
@@ -70,7 +70,7 @@ atp-dashboard/
 
 ## How ATP Discovery Works
 
-The dashboard automatically discovers ATP contracts using the following process:
+The explorer automatically discovers ATP contracts using the following process:
 
 1. **Fetch Token Holders**: Gets all AZTEC token holders from Moralis API
 2. **Detect ATP Contracts**: For each token holder address, checks if it implements ATP interface methods:

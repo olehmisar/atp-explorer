@@ -73,7 +73,7 @@ export default function SearchResultsPage() {
               href="/"
               className="mt-4 inline-block px-4 py-2 bg-vermillion text-lapis rounded hover:bg-red-700"
             >
-              Back to Dashboard
+              Back to Explorer
             </Link>
           </div>
         </div>
@@ -104,7 +104,7 @@ export default function SearchResultsPage() {
         <div className="container mx-auto px-4 py-8">
           <div className="mb-6">
             <Link href="/" className="text-chartreuse hover:underline">
-              ← Back to Dashboard
+              ← Back to Explorer
             </Link>
           </div>
           <div className="bg-[#2A2410] shadow-md p-8 text-center border border-[#3A3420]">
@@ -130,7 +130,7 @@ export default function SearchResultsPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <Link href="/" className="text-chartreuse hover:underline">
-            ← Back to Dashboard
+            ← Back to Explorer
           </Link>
         </div>
 

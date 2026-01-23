@@ -1,5 +1,5 @@
 import { getCachedStats } from "@/lib/redis";
-import { ATPDashboardData } from "@/types/atp";
+import { ATPExplorerData } from "@/types/atp";
 import { NextResponse } from "next/server";
 
 /**
@@ -20,7 +20,7 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json(cached as ATPDashboardData);
+    return NextResponse.json(cached as ATPExplorerData);
   } catch (error) {
     console.error("Error in stats API:", error);
     return NextResponse.json(

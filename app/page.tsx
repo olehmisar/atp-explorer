@@ -60,7 +60,7 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8">
         <header className="mb-8">
           <h1 className="text-4xl font-light text-chartreuse mb-2">
-            ATP Dashboard
+            ATP Explorer
           </h1>
           <p className="text-[#D4D0C0] font-body">
             Aztec Token Position Statistics

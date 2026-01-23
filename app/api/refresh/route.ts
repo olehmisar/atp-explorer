@@ -14,7 +14,7 @@ import {
 } from "@/lib/redis";
 import { calculateUnlockSchedule } from "@/lib/unlock-calculator";
 import {
-  ATPDashboardData,
+  ATPExplorerData,
   ATPData,
   ATPStats,
   ATPType,
@@ -158,7 +158,7 @@ async function refreshHolders(): Promise<TokenHolder[]> {
  * Refresh cache - Step 2: Discover and fetch ATPs, then cache everything
  * Uses batched discovery and fetching to avoid memory issues
  */
-async function refreshATPs(holders: TokenHolder[]): Promise<ATPDashboardData> {
+async function refreshATPs(holders: TokenHolder[]): Promise<ATPExplorerData> {
   console.log("Step 2: Discovering and fetching ATPs...");
 
   // Prepare addresses
@@ -214,7 +214,7 @@ async function refreshATPs(holders: TokenHolder[]): Promise<ATPDashboardData> {
   };
 
   const lastUpdated = Date.now();
-  const responseData: ATPDashboardData = {
+  const responseData: ATPExplorerData = {
     stats,
     atps,
     lastUpdated,

@@ -73,7 +73,7 @@ export default function ATPDetailPage() {
               href="/"
               className="mt-4 inline-block px-4 py-2 bg-vermillion text-lapis rounded hover:bg-red-700"
             >
-              Back to Dashboard
+              Back to Explorer
             </Link>
           </div>
         </div>
@@ -94,7 +94,7 @@ export default function ATPDetailPage() {
               href="/"
               className="mt-4 inline-block px-4 py-2 bg-chartreuse text-lapis rounded hover:bg-yellow-700"
             >
-              Back to Dashboard
+              Back to Explorer
             </Link>
           </div>
         </div>
@@ -107,7 +107,7 @@ export default function ATPDetailPage() {
       <div className="container mx-auto px-4 py-8">
         <header className="mb-8">
           <Link href="/" className="text-chartreuse hover:underline">
-            ← Back to Dashboard
+            ← Back to Explorer
           </Link>
           <h1 className="text-4xl font-light text-chartreuse">ATP Details</h1>
           <p className="text-sm text-[#948F80]">
