@@ -20,7 +20,7 @@ An explorer for visualizing Aztec Token Position (ATP) statistics on Ethereum ma
 
 1. **Install dependencies**:
    ```bash
-   npm install
+   pnpm install
    ```
 
 2. **Configure environment variables**:
@@ -36,7 +36,7 @@ An explorer for visualizing Aztec Token Position (ATP) statistics on Ethereum ma
 
 3. **Run the development server**:
    ```bash
-   npm run dev
+   pnpm run dev
    ```
 
 4. **Open your browser**:

@@ -9,7 +9,6 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            // With server-side caching, we can use stale data
             retry: 1,
           },
         },
