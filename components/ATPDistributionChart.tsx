@@ -55,7 +55,7 @@ export default function ATPDistributionChart({
   atps,
   tokenHolders = [],
 }: ATPDistributionChartProps) {
-  const [includeNonATPHolders, setIncludeNonATPHolders] = useState(false);
+  const [includeNonATPHolders, setIncludeNonATPHolders] = useState(true);
 
   const atpAmounts = atps
     .map((a) => parseFloat(formatUnits(BigInt(a.allocation), DECIMALS)))
