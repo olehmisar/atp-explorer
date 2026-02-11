@@ -1,3 +1,4 @@
+import DisclaimerBanner from "@/components/DisclaimerBanner";
 import { QueryProvider } from "@/components/QueryProvider";
 import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
@@ -15,8 +16,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <QueryProvider>{children}</QueryProvider>
+      <body className="flex flex-col min-h-screen">
+        <DisclaimerBanner />
+        <main className="flex-1">
+          <QueryProvider>{children}</QueryProvider>
+        </main>
         <Analytics />
       </body>
     </html>
