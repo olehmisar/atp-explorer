@@ -1,6 +1,5 @@
 import { ATPData, TokenHolder } from "@/types/atp";
 import { useState } from "react";
-import { formatUnits } from "viem";
 import {
   Bar,
   CartesianGrid,
@@ -11,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { formatUnits } from "viem";
 
 interface ATPDistributionChartProps {
   atps: ATPData[];
@@ -43,11 +43,16 @@ function formatAZTEC(value: number): string {
 
 const BIN_EDGES = [
   0,
-  200_000, // 0–200k (combines 0–10k, 10k–50k, 50k–100k, 100k–200k)
+  200_000,
   500_000,
   1_000_000,
   5_000_000,
   10_000_000,
+  20_000_000,
+  30_000_000,
+  50_000_000,
+  80_000_000,
+  700_000_000,
   Infinity,
 ];
 
