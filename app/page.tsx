@@ -1,5 +1,6 @@
 "use client";
 
+import ATPDistributionChart from "@/components/ATPDistributionChart";
 import ATPTable from "@/components/ATPTable";
 import StatsCards from "@/components/StatsCards";
 import TokenHoldersList from "@/components/TokenHoldersList";
@@ -123,6 +124,13 @@ export default function Home() {
 
         <div className="mt-8">
           <UnlockChart atps={atps} />
+        </div>
+
+        <div className="mt-8">
+          <ATPDistributionChart
+            atps={atps}
+            tokenHolders={stats?.tokenHolders?.holders ?? []}
+          />
         </div>
 
         <div className="mt-8">
