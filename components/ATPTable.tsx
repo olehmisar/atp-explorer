@@ -68,6 +68,8 @@ export default function ATPTable({ atps }: ATPTableProps) {
   >(null);
   const [minAllocation, setMinAllocation] = useState<string>("");
   const [maxAllocation, setMaxAllocation] = useState<string>("");
+  const [minUnlocked, setMinUnlocked] = useState<string>("");
+  const [maxUnlocked, setMaxUnlocked] = useState<string>("");
   const [sortColumn, setSortColumn] = useState<SortColumn>("allocation");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
@@ -113,10 +115,39 @@ export default function ATPTable({ atps }: ATPTableProps) {
         }
       }
 
+      // Unlocked filter: min and max range (convert from tokens to wei)
+      let unlockedMatch = true;
+      if (minUnlocked !== "" || maxUnlocked !== "") {
+        try {
+          const unlocked = atp.unlockSchedule
+            ? BigInt(atp.unlockSchedule.currentUnlocked)
+            : BigInt(0);
+          const tokenDecimals = BigInt(10 ** 18);
+
+          const convertTokensToWei = (tokenValue: string): bigint => {
+            const parts = tokenValue.split(".");
+            const wholePart = parts[0] || "0";
+            const decimalPart = (parts[1] || "").padEnd(18, "0").slice(0, 18);
+            return BigInt(wholePart) * tokenDecimals + BigInt(decimalPart);
+          };
+
+          const minWei =
+            minUnlocked === "" ? null : convertTokensToWei(minUnlocked);
+          const maxWei =
+            maxUnlocked === "" ? null : convertTokensToWei(maxUnlocked);
+
+          const minMatch = minWei === null || unlocked >= minWei;
+          const maxMatch = maxWei === null || unlocked <= maxWei;
+          unlockedMatch = minMatch && maxMatch;
+        } catch {
+          unlockedMatch = true;
+        }
+      }
+
       // All filters must match (AND logic)
-      return typeMatch && revokableMatch && allocationMatch;
+      return typeMatch && revokableMatch && allocationMatch && unlockedMatch;
     });
-  }, [atps, selectedTypes, selectedRevokable, minAllocation, maxAllocation]);
+  }, [atps, selectedTypes, selectedRevokable, minAllocation, maxAllocation, minUnlocked, maxUnlocked]);
 
   // Apply sorting
   const sortedATPs = useMemo(() => {
@@ -192,6 +223,17 @@ export default function ATPTable({ atps }: ATPTableProps) {
     handleFilterChange();
   };
 
+  // Handle unlocked filter changes
+  const handleMinUnlockedChange = (value: string) => {
+    setMinUnlocked(value);
+    handleFilterChange();
+  };
+
+  const handleMaxUnlockedChange = (value: string) => {
+    setMaxUnlocked(value);
+    handleFilterChange();
+  };
+
   // Handle sorting
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
@@ -210,6 +252,8 @@ export default function ATPTable({ atps }: ATPTableProps) {
     setSelectedRevokable(null);
     setMinAllocation("");
     setMaxAllocation("");
+    setMinUnlocked("");
+    setMaxUnlocked("");
     handleFilterChange();
   };
 
@@ -218,7 +262,9 @@ export default function ATPTable({ atps }: ATPTableProps) {
     selectedTypes.size > 0 ||
     selectedRevokable !== null ||
     minAllocation !== "" ||
-    maxAllocation !== "";
+    maxAllocation !== "" ||
+    minUnlocked !== "" ||
+    maxUnlocked !== "";
 
   if (atps.length === 0) {
     return (
@@ -494,7 +540,7 @@ export default function ATPTable({ atps }: ATPTableProps) {
                     placeholder="Min"
                     value={minAllocation}
                     onChange={(e) => handleMinAllocationChange(e.target.value)}
-                    className="px-3 py-1.5 text-xs border border-[#3A3420]"
+                    className="px-3 py-1.5 text-xs border border-[#3A3420] bg-[#1A1400] text-parchment"
                   />
                   <span className="text-xs text-[#948F80]">to</span>
                   <input
@@ -502,12 +548,37 @@ export default function ATPTable({ atps }: ATPTableProps) {
                     placeholder="Max"
                     value={maxAllocation}
                     onChange={(e) => handleMaxAllocationChange(e.target.value)}
-                    className="px-3 py-1.5 text-xs border border-[#3A3420]"
+                    className="px-3 py-1.5 text-xs border border-[#3A3420] bg-[#1A1400] text-parchment"
                   />
                 </div>
                 <p className="text-xs text-[#948F80]">
-                  Enter values in AZTEC tokens (18 decimals, e.g., 1 for 1
-                  token)
+                  Enter values in AZTEC tokens (e.g., 1000000)
+                </p>
+              </div>
+              {/* Unlocked tokens filters */}
+              <div>
+                <label className="text-xs font-medium text-[#B4B0A0]">
+                  Unlocked Tokens Range
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="Min"
+                    value={minUnlocked}
+                    onChange={(e) => handleMinUnlockedChange(e.target.value)}
+                    className="px-3 py-1.5 text-xs border border-[#3A3420] bg-[#1A1400] text-parchment"
+                  />
+                  <span className="text-xs text-[#948F80]">to</span>
+                  <input
+                    type="text"
+                    placeholder="Max"
+                    value={maxUnlocked}
+                    onChange={(e) => handleMaxUnlockedChange(e.target.value)}
+                    className="px-3 py-1.5 text-xs border border-[#3A3420] bg-[#1A1400] text-parchment"
+                  />
+                </div>
+                <p className="text-xs text-[#948F80]">
+                  Enter values in AZTEC tokens (e.g., 500000)
                 </p>
               </div>
             </div>
