@@ -112,11 +112,11 @@ function calculateATPStats(atps: ATPData[]): Omit<ATPStats, "tokenHolders"> {
  * Refresh cache - Step 1: Fetch and cache holders
  * Uses separate last refresh timestamp for holders
  */
-async function refreshHolders(): Promise<TokenHolder[]> {
+async function refreshHolders(force: boolean = false): Promise<TokenHolder[]> {
   console.log("Step 1: Checking holders cache...");
 
-  // Check if holders refresh should be skipped
-  const skipHolders = await shouldSkipHoldersRefresh();
+  // Check if holders refresh should be skipped (unless force)
+  const skipHolders = !force && (await shouldSkipHoldersRefresh());
   if (skipHolders) {
     console.log("Skipping holders refresh - data was recently refreshed");
     const cached = await getCachedHolders();
@@ -236,17 +236,23 @@ async function refreshATPs(holders: TokenHolder[]): Promise<ATPExplorerData> {
  * Refresh endpoint - can be called by anyone
  * Should be called daily via Vercel Cron or similar
  *
+ * Query params:
+ * - force=1: Bypass skip checks and force full refresh
+ *
  * Uses Redis to prevent race conditions and DDoS:
  * - Only one refresh can run at a time (lock)
  * - Skips refresh if data was refreshed within 90% of refresh interval
  */
-export async function GET() {
+export async function GET(request: Request) {
   const LOCK_KEY = "atp:refresh:lock";
   const LOCK_TTL = 3600; // 1 hour lock timeout
 
+  const { searchParams } = new URL(request.url);
+  const force = searchParams.get("force") === "1";
+
   try {
-    // Check if refresh should be skipped (within 90% of refresh interval)
-    const skip = await shouldSkipRefresh();
+    // Check if refresh should be skipped (unless force=1)
+    const skip = !force && (await shouldSkipRefresh());
     if (skip) {
       console.log("Skipping refresh - data was recently refreshed");
       return NextResponse.json({
@@ -274,7 +280,7 @@ export async function GET() {
 
     try {
       // Step 1: Fetch and cache holders
-      const holders = await refreshHolders();
+      const holders = await refreshHolders(force);
 
       // Step 2: Discover ATPs and cache everything
       const data = await refreshATPs(holders);
