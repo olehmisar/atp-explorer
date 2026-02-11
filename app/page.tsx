@@ -66,6 +66,10 @@ export default function Home() {
           <p className="text-[#D4D0C0] font-body">
             Aztec Token Position Statistics
           </p>
+          <p className="text-sm text-[#B4B0A0] mt-1">
+            This website is community owned and is not affiliated with Aztec
+            Foundation or Aztec Labs in any form.
+          </p>
           <p className="text-sm text-[#B4B0A0] mt-2">
             Token Address:{" "}
             <span className="font-mono">{AZTEC_TOKEN_ADDRESS}</span>
