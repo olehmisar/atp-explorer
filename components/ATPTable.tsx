@@ -491,7 +491,9 @@ export default function ATPTable({ atps }: ATPTableProps) {
                       type="button"
                       onClick={() => toggleTypeFilter(type)}
                       className={`px-3 py-1.5 text-xs font-medium border transition-colors text-chartreuse ${
-                        selectedTypes.has(type) ? "bg-lapis/30" : "bg-[#2A2410]"
+                        selectedTypes.has(type)
+                          ? "bg-chartreuse/25 border-chartreuse"
+                          : "bg-[#2A2410] border-[#3A3420]"
                       }`}
                     >
                       {type}
@@ -510,8 +512,8 @@ export default function ATPTable({ atps }: ATPTableProps) {
                     onClick={() => handleRevokableFilterChange("revokable")}
                     className={`px-3 py-1.5 text-xs font-medium border transition-colors text-chartreuse ${
                       selectedRevokable === "revokable"
-                        ? "bg-lapis/30"
-                        : "bg-[#2A2410]"
+                        ? "bg-chartreuse/25 border-chartreuse"
+                        : "bg-[#2A2410] border-[#3A3420]"
                     }`}
                   >
                     Revokable
@@ -521,8 +523,8 @@ export default function ATPTable({ atps }: ATPTableProps) {
                     onClick={() => handleRevokableFilterChange("non-revokable")}
                     className={`px-3 py-1.5 text-xs font-medium border transition-colors text-chartreuse ${
                       selectedRevokable === "non-revokable"
-                        ? "bg-lapis/30"
-                        : "bg-[#2A2410]"
+                        ? "bg-chartreuse/25 border-chartreuse"
+                        : "bg-[#2A2410] border-[#3A3420]"
                     }`}
                   >
                     Non-Revokable
