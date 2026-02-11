@@ -14,8 +14,8 @@ import {
 } from "@/lib/redis";
 import { calculateUnlockSchedule } from "@/lib/unlock-calculator";
 import {
-  ATPExplorerData,
   ATPData,
+  ATPExplorerData,
   ATPStats,
   ATPType,
   HolderType,

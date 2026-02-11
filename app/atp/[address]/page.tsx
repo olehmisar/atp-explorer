@@ -354,17 +354,96 @@ export default function ATPDetailPage() {
             </div>
           )}
 
+          {/* Accumulation Lock Details (for revokable LATPs) */}
+          {atpWithSchedule.accumulationLock && (
+            <div className="mb-6">
+              <h2 className="text-lg font-light text-chartreuse">
+                Accumulation Lock
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <div className="text-sm text-[#B4B0A0]">Start Time</div>
+                  <div className="text-sm font-semibold text-aqua">
+                    {format(
+                      new Date(
+                        Math.floor(
+                          atpWithSchedule.accumulationLock.startTime,
+                        ),
+                      ),
+                      "MMM dd, yyyy HH:mm",
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-[#B4B0A0]">Cliff Duration</div>
+                  <div className="text-sm font-semibold text-aqua">
+                    {Math.floor(
+                      atpWithSchedule.accumulationLock.cliffDuration /
+                        (1000 * 60 * 60 * 24),
+                    )}{" "}
+                    days
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-[#B4B0A0]">Lock Duration</div>
+                  <div className="text-sm font-semibold text-aqua">
+                    {Math.floor(
+                      atpWithSchedule.accumulationLock.lockDuration /
+                        (1000 * 60 * 60 * 24),
+                    )}{" "}
+                    days
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-[#B4B0A0]">Lock Amount</div>
+                  <div className="text-sm font-semibold text-aqua">
+                    {formatTokenAmount(
+                      atpWithSchedule.accumulationLock.amount,
+                    )}
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-[#948F80] mt-2">
+                Tokens accumulate along this schedule. Only accumulated tokens
+                are non-revokable and available for claiming (subject to global
+                unlock).
+              </p>
+            </div>
+          )}
+
           {/* Milestone Info */}
           {atpWithSchedule.milestoneId && (
             <div className="mb-6">
               <h2 className="text-lg font-light text-chartreuse">
                 Milestone Information
               </h2>
-              <div>
-                <span className="text-sm text-[#B4B0A0]">Milestone ID:</span>
-                <span className="ml-2 font-mono text-aqua">
-                  {atpWithSchedule.milestoneId}
-                </span>
+              <div className="space-y-1">
+                <div>
+                  <span className="text-sm text-[#B4B0A0]">Milestone ID:</span>
+                  <span className="ml-2 font-mono text-aqua">
+                    {atpWithSchedule.milestoneId}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-sm text-[#B4B0A0]">Status:</span>
+                  <span
+                    className={`ml-2 font-semibold ${
+                      atpWithSchedule.milestoneStatus === "Succeeded"
+                        ? "text-malachite"
+                        : atpWithSchedule.milestoneStatus === "Failed"
+                        ? "text-vermillion"
+                        : "text-[#B4B0A0]"
+                    }`}
+                  >
+                    {atpWithSchedule.milestoneStatus || "Unknown"}
+                  </span>
+                </div>
+                {atpWithSchedule.milestoneStatus === "Pending" && (
+                  <p className="text-xs text-[#948F80] mt-1">
+                    Tokens cannot be claimed until the milestone succeeds. The
+                    unlock schedule shows vesting progress.
+                  </p>
+                )}
               </div>
             </div>
           )}

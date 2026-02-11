@@ -1,4 +1,4 @@
-import { ATPData, ATPType } from "@/types/atp";
+import { ATPData, ATPType, Lock } from "@/types/atp";
 import { Address, createPublicClient, http } from "viem";
 import { mainnet } from "viem/chains";
 import { AZTEC_TOKEN_ADDRESS } from "./constants";
@@ -74,6 +74,36 @@ const ATP_ABI = [
     outputs: [{ name: "", type: "uint256" }],
     stateMutability: "view",
   },
+  {
+    name: "getRegistry",
+    type: "function",
+    inputs: [],
+    outputs: [{ name: "", type: "address" }],
+    stateMutability: "view",
+  },
+  {
+    name: "getAccumulationLock",
+    type: "function",
+    inputs: [],
+    outputs: [
+      { name: "startTime", type: "uint256" },
+      { name: "cliff", type: "uint256" },
+      { name: "endTime", type: "uint256" },
+      { name: "allocation", type: "uint256" },
+    ],
+    stateMutability: "view",
+  },
+] as const;
+
+// Registry contract ABI - for fetching milestone status
+const REGISTRY_ABI = [
+  {
+    name: "getMilestoneStatus",
+    type: "function",
+    inputs: [{ name: "_milestoneId", type: "uint96" }],
+    outputs: [{ name: "", type: "uint8" }],
+    stateMutability: "view",
+  },
 ] as const;
 
 const ERC20_ABI = [
@@ -124,6 +154,8 @@ export async function fetchATPData(
         balance,
         isRevokedResult,
         milestoneIdResult,
+        registryResult,
+        accumulationLockResult,
       ] = await Promise.allSettled([
         client.readContract({
           address: atpAddress,
@@ -179,6 +211,22 @@ export async function fetchATPData(
             address: atpAddress,
             abi: ATP_ABI,
             functionName: "getMilestoneId",
+          })
+          .catch(() => null),
+        // Registry address - needed for milestone status lookup
+        client
+          .readContract({
+            address: atpAddress,
+            abi: ATP_ABI,
+            functionName: "getRegistry",
+          })
+          .catch(() => null),
+        // Accumulation lock - only exists on revokable LATPs, reverts otherwise
+        client
+          .readContract({
+            address: atpAddress,
+            abi: ATP_ABI,
+            functionName: "getAccumulationLock",
           })
           .catch(() => null),
       ]);
@@ -284,6 +332,13 @@ export async function fetchATPData(
 
       let milestoneStatus: "Pending" | "Succeeded" | "Failed" | undefined;
 
+      // Extract registry address (optional)
+      const registryAddress =
+        registryResult.status === "fulfilled" &&
+        registryResult.value !== null
+          ? (registryResult.value as Address)
+          : null;
+
       // Map type enum to ATPType
       const atpTypeMap: Record<number, ATPType> = {
         0: ATPType.Linear,
@@ -292,6 +347,70 @@ export async function fetchATPData(
       };
 
       const atpType = atpTypeMap[Number(typeValue)] || ATPType.Linear;
+
+      // Fetch milestone status from Registry for Milestone ATPs
+      if (
+        atpType === ATPType.Milestone &&
+        milestoneId !== undefined &&
+        registryAddress
+      ) {
+        try {
+          const statusResult = await client.readContract({
+            address: registryAddress,
+            abi: REGISTRY_ABI,
+            functionName: "getMilestoneStatus",
+            args: [BigInt(milestoneId)],
+          });
+          const statusMap: Record<number, "Pending" | "Failed" | "Succeeded"> =
+            {
+              0: "Pending",
+              1: "Failed",
+              2: "Succeeded",
+            };
+          milestoneStatus = statusMap[Number(statusResult)];
+        } catch (error) {
+          console.warn(
+            `Failed to fetch milestone status for ${atpAddress}:`,
+            error,
+          );
+        }
+      }
+
+      // Process accumulation lock (only present on revokable LATPs)
+      let accumulationLock: Lock | undefined;
+      if (
+        accumulationLockResult.status === "fulfilled" &&
+        accumulationLockResult.value !== null
+      ) {
+        try {
+          const accLockTuple = accumulationLockResult.value as readonly [
+            bigint,
+            bigint,
+            bigint,
+            bigint,
+          ];
+          const accStartTimeSeconds = Number(accLockTuple[0]);
+          const accCliffSeconds = Number(accLockTuple[1]); // cliff timestamp
+          const accEndTimeSeconds = Number(accLockTuple[2]); // endTime timestamp
+
+          const accCliffDurationSeconds =
+            accCliffSeconds - accStartTimeSeconds;
+          const accLockDurationSeconds =
+            accEndTimeSeconds - accStartTimeSeconds;
+
+          accumulationLock = {
+            startTime: accStartTimeSeconds * 1000,
+            cliffDuration: accCliffDurationSeconds * 1000,
+            lockDuration: accLockDurationSeconds * 1000,
+            amount: accLockTuple[3].toString(),
+          };
+        } catch (error) {
+          console.warn(
+            `Failed to parse accumulation lock for ${atpAddress}:`,
+            error,
+          );
+        }
+      }
 
       // Convert all BigInt values to strings for JSON serialization
       // globalLock returns Lock struct: [startTime, cliff, endTime, allocation]
@@ -341,6 +460,7 @@ export async function fetchATPData(
           lockDuration, // Duration in milliseconds (endTime - startTime)
           amount: lockAmount.toString(), // Convert BigInt to string for JSON serialization
         },
+        accumulationLock,
         milestoneId,
         milestoneStatus,
       };
