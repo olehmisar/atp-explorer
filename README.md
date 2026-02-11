@@ -14,7 +14,7 @@ An explorer for visualizing Aztec Token Position (ATP) statistics on Ethereum ma
 
 - **LATP (Linear)**: Linearly unlocked ATP positions
 - **MATP (Milestone)**: Milestone-based ATP positions
-- **NCATP (Non-Claim)**: Non-claimable ATP positions
+- **NCATP (Non-Claim)**: Non-claimable ATP positions (vesting = linear, claim via staking/unstaking)
 
 ## Setup
 

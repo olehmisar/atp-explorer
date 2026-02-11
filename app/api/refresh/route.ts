@@ -174,11 +174,16 @@ async function refreshATPs(holders: TokenHolder[]): Promise<ATPExplorerData> {
   const atps = await discoverAndFetchATPs(addresses);
 
   // Calculate unlock schedules for all ATPs
+  // NonClaim uses same linear formula as Linear (claim goes through staking/unstaking)
   console.log("Calculating unlock schedules...");
   atps.forEach((atp) => {
-    // Calculate unlock schedule if globalLock exists
     if (atp.globalLock) {
-      atp.unlockSchedule = calculateUnlockSchedule(atp.globalLock);
+      // Use allocation for NonClaim vesting amount (linear unlock, same as Linear)
+      const lock =
+        atp.type === ATPType.NonClaim
+          ? { ...atp.globalLock, amount: atp.allocation }
+          : atp.globalLock;
+      atp.unlockSchedule = calculateUnlockSchedule(lock);
     }
   });
 
