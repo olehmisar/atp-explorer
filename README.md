@@ -19,11 +19,13 @@ An explorer for visualizing Aztec Token Position (ATP) statistics on Ethereum ma
 ## Setup
 
 1. **Install dependencies**:
+
    ```bash
    pnpm install
    ```
 
 2. **Configure environment variables**:
+
    ```bash
    cp .env.example .env
    ```
@@ -35,6 +37,7 @@ An explorer for visualizing Aztec Token Position (ATP) statistics on Ethereum ma
    - `MAX_ATP_CHECK` (optional): Maximum number of token holder addresses to check for ATP contracts (defaults to 1000)
 
 3. **Run the development server**:
+
    ```bash
    pnpm run dev
    ```
@@ -90,6 +93,7 @@ The explorer automatically discovers ATP contracts using the following process:
    - `TOKEN.balanceOf()` - Current token balance
 
 The discovery process is optimized with:
+
 - Batch processing (20 addresses at a time)
 - Progress logging
 - Error handling for failed contract calls
