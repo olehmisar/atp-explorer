@@ -15,6 +15,7 @@ export const ADDRESS_NAMES: Record<string, string> = {
   "0x3d6a1b00c830c5f278fc5dfb3f6ff0b74db6dfe0": "Aztec Rewards Distributor",
   "0x4b00c30ceba3f188407c6e6741cc5b43561f1f6e": "Aztec Token Sale",
   "0x000000000004444c5dc75cb358380d2e3de08a90": "Uniswap V4",
+  "0xf89d7b9c864f589bbF53a82105107622B35EaA40": "Bybit",
 };
 
 // Default number of addresses to check for ATP contracts
